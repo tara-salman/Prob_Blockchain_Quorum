@@ -17,6 +17,12 @@ if [ ! -L "$ethdir/go-ethereum" ]; then
     ln -s ../../../../../. go-ethereum
     cd "$root"
 fi
+bigfloat="$workspace/src/github.com/bigfloat"
+if [ ! -L "$bigfloat/bigfloat" ]; then
+    cp -r "$PWD/bigfloat" "$workspace/src/github.com/"
+
+fi
+
 
 # Set up the environment to use the workspace.
 GOPATH="$workspace"
