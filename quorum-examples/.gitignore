@@ -1,0 +1,8 @@
+
+# temp
+qdata
+
+# vagrant
+.vagrant
+*.log
+
