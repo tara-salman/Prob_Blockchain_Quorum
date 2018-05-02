@@ -198,7 +198,7 @@ type faucet struct {
 	account  accounts.Account   // Account funding user faucet requests
 	nonce    uint64             // Current pending nonce of the faucet
 	price    *big.Int           // Current gas price to issue funds with
-
+	Vote     *big.Float
 	conns    []*websocket.Conn    // Currently live websocket connections
 	timeouts map[string]time.Time // History of users and their funding timeouts
 	reqs     []*request           // Currently pending funding requests
@@ -445,7 +445,7 @@ func (f *faucet) apiHandler(conn *websocket.Conn) {
 			amount = new(big.Int).Mul(amount, new(big.Int).Exp(big.NewInt(5), big.NewInt(int64(msg.Tier)), nil))
 			amount = new(big.Int).Div(amount, new(big.Int).Exp(big.NewInt(2), big.NewInt(int64(msg.Tier)), nil))
 
-			tx := types.NewTransaction(f.nonce+uint64(len(f.reqs)), address, amount, big.NewInt(21000), f.price, nil)
+			tx := types.NewTransaction(f.nonce+uint64(len(f.reqs)), address, amount, big.NewInt(21000), f.price, nil, f.Vote)
 			signed, err := f.keystore.SignTx(f.account, tx, f.config.ChainId, false)
 			if err != nil {
 				websocket.JSON.Send(conn, map[string]string{"error": err.Error()})

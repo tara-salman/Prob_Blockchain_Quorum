@@ -24,9 +24,9 @@ PATH=$PATH:/usr/local/go/bin
 echo 'PATH=$PATH:/usr/local/go/bin' >> /home/vagrant/.bashrc
 
 # make/install quorum
-git clone https://tarasalman@bitbucket.org/tarasalman/probablistic-blockchain.git
+git clone https://tarasalman:Mustafa98@bitbucket.org/tarasalman/probablistic-blockchain.git/
 pushd probablistic-blockchain >/dev/null
-git checkout tags/v2.0.1
+#git checkout tags/v2.0.1
 make all
 cp build/bin/geth /usr/local/bin
 cp build/bin/bootnode /usr/local/bin
