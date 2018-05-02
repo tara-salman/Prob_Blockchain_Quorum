@@ -38,7 +38,7 @@ mv porosity /usr/local/bin && chmod 0755 /usr/local/bin/porosity
 
 # copy examples
 cp -r /vagrant/examples /home/vagrant/quorum-examples
-chown -R vagrant:vagrant /home/vagrant/quorum /home/vagrant/quorum-examples
+chown -R vagrant:vagrant /home/vagrant/probablistic-blockchain /home/vagrant/quorum-examples
 
 # done!
 banner "Quorum"
