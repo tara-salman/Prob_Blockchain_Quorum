@@ -83,12 +83,12 @@ type txdataMarshaling struct {
 	S            *hexutil.Big
 }
 
-func NewTransaction(nonce uint64, to common.Address, amount, gasLimit, gasPrice *big.Int, data []byte, vote *big.Float) *Transaction {
-	return newTransaction(nonce, &to, amount, gasLimit, gasPrice, data, vote)
+func NewTransaction(nonce uint64, to common.Address, amount, gasLimit, gasPrice *big.Int, data []byte, vote float64) *Transaction {
+	return newTransaction(nonce, &to, amount, gasLimit, gasPrice, data, new(big.Float).SetFloat64(vote))
 }
 
-func NewContractCreation(nonce uint64, amount, gasLimit, gasPrice *big.Int, data []byte, vote *big.Float) *Transaction {
-	return newTransaction(nonce, nil, amount, gasLimit, gasPrice, data, vote)
+func NewContractCreation(nonce uint64, amount, gasLimit, gasPrice *big.Int, data []byte, vote float64) *Transaction {
+	return newTransaction(nonce, nil, amount, gasLimit, gasPrice, data,  new(big.Float).SetFloat64(vote))
 }
 func newTransaction(nonce uint64, to *common.Address, amount, gasLimit, gasPrice *big.Int, data []byte, vote *big.Float) *Transaction {
 	if len(data) > 0 {
@@ -302,6 +302,7 @@ func (tx *Transaction) String() string {
 	Value:    %#x
 	Data:     0x%x
 	V:        %#x
+	Vote:     %#x
 	R:        %#x
 	S:        %#x
 	Hex:      %x
@@ -458,14 +459,14 @@ type Message struct {
 	isPrivate               bool
 }
 
-func NewMessage(from common.Address, to *common.Address, nonce uint64, amount, gasLimit, price *big.Int, data []byte, checkNonce bool, vote *big.Float) Message {
+func NewMessage(from common.Address, to *common.Address, nonce uint64, amount, gasLimit, price *big.Int, data []byte, checkNonce bool, vote float64) Message {
 	return Message{
 		from:       from,
 		to:         to,
 		nonce:      nonce,
 		amount:     amount,
 		price:      price,
-		vote:       vote,
+		vote:       new(big.Float).SetFloat64(vote),
 		gasLimit:   gasLimit,
 		data:       data,
 		checkNonce: checkNonce,

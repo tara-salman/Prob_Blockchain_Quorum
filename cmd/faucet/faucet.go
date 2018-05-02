@@ -198,7 +198,7 @@ type faucet struct {
 	account  accounts.Account   // Account funding user faucet requests
 	nonce    uint64             // Current pending nonce of the faucet
 	price    *big.Int           // Current gas price to issue funds with
-	Vote     *big.Float
+	Vote     float64
 	conns    []*websocket.Conn    // Currently live websocket connections
 	timeouts map[string]time.Time // History of users and their funding timeouts
 	reqs     []*request           // Currently pending funding requests

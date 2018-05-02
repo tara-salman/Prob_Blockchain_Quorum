@@ -591,7 +591,7 @@ type CallArgs struct {
 	To       *common.Address `json:"to"`
 	Gas      hexutil.Big     `json:"gas"`
 	GasPrice hexutil.Big     `json:"gasPrice"`
-	Vote     *big.Float     `json:"gasPrice"`
+	Vote     float64     `json:"gasPrice"`
 	Value    hexutil.Big     `json:"value"`
 	Data     hexutil.Bytes   `json:"data"`
 }
@@ -1069,7 +1069,7 @@ type SendTxArgs struct {
 	Value    *hexutil.Big    `json:"value"`
 	Data     hexutil.Bytes   `json:"data"`
 	Nonce    *hexutil.Uint64 `json:"nonce"`
-	Vote     *big.Float
+	Vote     float64
 	PrivateFrom string   `json:"privateFrom"`
 	PrivateFor  []string `json:"privateFor"`
 }
@@ -1505,9 +1505,9 @@ func (a *Async) save(ctx context.Context, s *PublicTransactionPoolAPI, args Send
 	}
 	var tx *types.Transaction
 	if args.To == nil {
-		tx = types.NewContractCreation((uint64)(*args.Nonce), (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), data, (*big.Float)(args.Vote))
+		tx = types.NewContractCreation((uint64)(*args.Nonce), (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), data, (float64)(args.Vote))
 	} else {
-		tx = types.NewTransaction((uint64)(*args.Nonce), *args.To, (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), data, (*big.Float)(args.Vote))
+		tx = types.NewTransaction((uint64)(*args.Nonce), *args.To, (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), data, (float64)(args.Vote))
 	}
 
 	signed, err := s.sign(args.From, tx)
