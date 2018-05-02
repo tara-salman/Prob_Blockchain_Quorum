@@ -23,6 +23,7 @@ func (t txdata) MarshalJSON() ([]byte, error) {
 		R            *hexutil.Big    `json:"r" gencodec:"required"`
 		S            *hexutil.Big    `json:"s" gencodec:"required"`
 		Hash         *common.Hash    `json:"hash" rlp:"-"`
+		Vote         *big.Float	     `json:"Vote"     gencodec:"required"`
 	}
 	var enc txdata
 	enc.AccountNonce = hexutil.Uint64(t.AccountNonce)
@@ -34,6 +35,7 @@ func (t txdata) MarshalJSON() ([]byte, error) {
 	enc.V = (*hexutil.Big)(t.V)
 	enc.R = (*hexutil.Big)(t.R)
 	enc.S = (*hexutil.Big)(t.S)
+	enc.Vote =t.Vote
 	enc.Hash = t.Hash
 	return json.Marshal(&enc)
 }
@@ -50,6 +52,7 @@ func (t *txdata) UnmarshalJSON(input []byte) error {
 		R            *hexutil.Big    `json:"r" gencodec:"required"`
 		S            *hexutil.Big    `json:"s" gencodec:"required"`
 		Hash         *common.Hash    `json:"hash" rlp:"-"`
+		Vote         *big.Float	     `json:"Vote"     gencodec:"required"`
 	}
 	var dec txdata
 	if err := json.Unmarshal(input, &dec); err != nil {
@@ -69,6 +72,9 @@ func (t *txdata) UnmarshalJSON(input []byte) error {
 	t.GasLimit = (*big.Int)(dec.GasLimit)
 	if dec.Recipient != nil {
 		t.Recipient = dec.Recipient
+	}
+	if dec.Vote != nil {
+		t.Vote = dec.Vote
 	}
 	if dec.Amount == nil {
 		return errors.New("missing required field 'value' for txdata")
