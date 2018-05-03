@@ -1018,6 +1018,7 @@ func (s *PublicTransactionPoolAPI) GetTransactionReceipt(hash common.Hash) (map[
 		"blockNumber":       hexutil.Uint64(blockNumber),
 		"transactionHash":   hash,
 		"transactionIndex":  hexutil.Uint64(index),
+		"Vote":              tx.Vote(),
 		"from":              from,
 		"to":                tx.To(),
 		"gasUsed":           (*hexutil.Big)(receipt.GasUsed),

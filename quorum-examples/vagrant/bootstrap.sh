@@ -18,19 +18,24 @@ rm -rf $CREL
 GOREL=go1.9.3.linux-amd64.tar.gz
 wget -q https://dl.google.com/go/$GOREL
 tar xfz $GOREL
-mv go /usr/local/go
+if [ ! -e "/usr/local/go" ]; then
+    mv go /usr/local/go
+fi
 rm -f $GOREL
 PATH=$PATH:/usr/local/go/bin
 echo 'PATH=$PATH:/usr/local/go/bin' >> /home/vagrant/.bashrc
 
 # make/install quorum
-git clone https://tarasalman:Mustafa98@bitbucket.org/tarasalman/probablistic-blockchain.git/
-pushd probablistic-blockchain >/dev/null
-#git checkout tags/v2.0.1
-make all
-cp build/bin/geth /usr/local/bin
-cp build/bin/bootnode /usr/local/bin
-popd >/dev/null
+#rm -r probablistic-blockchain
+if [ ! -e "probablistic-blockchain" ]; then
+	git clone https://tarasalman:Mustafa98@bitbucket.org/tarasalman/probablistic-blockchain.git/
+	pushd probablistic-blockchain >/dev/null
+	#git checkout tags/v2.0.1
+	make all
+	cp build/bin/geth /usr/local/bin
+	cp build/bin/bootnode /usr/local/bin
+	popd >/dev/null
+fi
 
 # install Porosity
 wget -q https://github.com/jpmorganchase/quorum/releases/download/v1.2.0/porosity
