@@ -848,7 +848,7 @@ func newRPCTransaction(tx *types.Transaction, blockHash common.Hash, blockNumber
 		Gas:      (*hexutil.Big)(tx.Gas()),
 		GasPrice: (*hexutil.Big)(tx.GasPrice()),
 		Hash:     tx.Hash(),
-		Input:    hexutil.Bgggggytes(tx.Data()),
+		Input:    hexutil.Bytes(tx.Data()),
 		Nonce:    hexutil.Uint64(tx.Nonce()),
 		To:       tx.To(),
 		Vote:     new(big.Float).SetFloat64(0.1),
