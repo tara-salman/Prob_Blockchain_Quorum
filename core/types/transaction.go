@@ -106,6 +106,7 @@ func newTransaction(nonce uint64, to *common.Address, amount, gasLimit, gasPrice
 		S:            new(big.Int),
 		Vote:         new(big.Float),
 	}
+	fmt.Sprintf("%#x",d.Vote)
 	if amount != nil {
 		d.Amount.Set(amount)
 	}
@@ -118,7 +119,7 @@ func newTransaction(nonce uint64, to *common.Address, amount, gasLimit, gasPrice
 	if gasPrice != nil {
 		d.Price.Set(gasPrice)
 	}
-
+	fmt.Sprintf("%#x",d.Vote)
 	return &Transaction{data: d}
 }
 
