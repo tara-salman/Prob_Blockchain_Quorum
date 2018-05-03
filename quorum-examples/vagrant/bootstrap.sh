@@ -29,8 +29,8 @@ echo 'PATH=$PATH:/usr/local/go/bin' >> /home/vagrant/.bashrc
 #rm -r probablistic-blockchain
 if [ -e "probablistic-blockchain" ]; then
 	rm -r probablistic-blockchain
-	rm -r /usr/local/bin/geth
-	rm -r /usr/local/bin/bootnode
+#	rm -r /usr/local/bin/geth
+	#rm -r /usr/local/bin/bootnode
 	rm -r /home/vagrant/quorum-examples
 fi
 git clone https://tarasalman:Mustafa98@bitbucket.org/tarasalman/probablistic-blockchain.git/

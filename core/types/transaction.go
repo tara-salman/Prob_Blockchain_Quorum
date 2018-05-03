@@ -76,7 +76,7 @@ type txdataMarshaling struct {
 	Price        *hexutil.Big
 	GasLimit     *hexutil.Big
 	Amount       *hexutil.Big
-	Vote         *hexutil.Big          
+	Vote         *big.Float         
 	Payload      hexutil.Bytes
 	V            *hexutil.Big
 	R            *hexutil.Big
