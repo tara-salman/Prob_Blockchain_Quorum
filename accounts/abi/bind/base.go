@@ -183,7 +183,7 @@ func (c *BoundContract) transact(opts *TransactOpts, contract *common.Address, i
 	}
 	vote := opts.Vote
 	if vote == 0 {
-		vote = 0.0
+		vote = 0.5
 	} 
 	// Figure out the gas allowance and gas price values
 	gasPrice := opts.GasPrice
