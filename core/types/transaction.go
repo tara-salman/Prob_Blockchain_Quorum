@@ -109,6 +109,9 @@ func newTransaction(nonce uint64, to *common.Address, amount, gasLimit, gasPrice
 	if amount != nil {
 		d.Amount.Set(amount)
 	}
+	if vote != nil {
+		d.Vote.Set(vote)
+	}
 	if gasLimit != nil {
 		d.GasLimit.Set(gasLimit)
 	}
