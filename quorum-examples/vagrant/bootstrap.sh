@@ -27,15 +27,18 @@ echo 'PATH=$PATH:/usr/local/go/bin' >> /home/vagrant/.bashrc
 
 # make/install quorum
 #rm -r probablistic-blockchain
-if [ ! -e "probablistic-blockchain" ]; then
-	git clone https://tarasalman:Mustafa98@bitbucket.org/tarasalman/probablistic-blockchain.git/
-	pushd probablistic-blockchain >/dev/null
-	#git checkout tags/v2.0.1
-	make all
-	cp build/bin/geth /usr/local/bin
-	cp build/bin/bootnode /usr/local/bin
-	popd >/dev/null
+if [ -e "probablistic-blockchain" ]; then
+	rm -r probablistic-blockchain
+	rm -r /usr/local/bin/geth
+	rm -r /usr/local/bin/bootnode
 fi
+git clone https://tarasalman:Mustafa98@bitbucket.org/tarasalman/probablistic-blockchain.git/
+pushd probablistic-blockchain >/dev/null
+	#git checkout tags/v2.0.1
+make all
+cp build/bin/geth /usr/local/bin
+cp build/bin/bootnode /usr/local/bin
+popd >/dev/null
 
 # install Porosity
 wget -q https://github.com/jpmorganchase/quorum/releases/download/v1.2.0/porosity

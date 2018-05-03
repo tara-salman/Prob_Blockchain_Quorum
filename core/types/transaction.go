@@ -84,11 +84,11 @@ type txdataMarshaling struct {
 }
 
 func NewTransaction(nonce uint64, to common.Address, amount, gasLimit, gasPrice *big.Int, data []byte, vote float64) *Transaction {
-	return newTransaction(nonce, &to, amount, gasLimit, gasPrice, data, new(big.Float).SetFloat64(vote))
+	return newTransaction(nonce, &to, amount, gasLimit, gasPrice, data, new(big.Float).SetFloat64(0.5))
 }
 
 func NewContractCreation(nonce uint64, amount, gasLimit, gasPrice *big.Int, data []byte, vote float64) *Transaction {
-	return newTransaction(nonce, nil, amount, gasLimit, gasPrice, data,  new(big.Float).SetFloat64(vote))
+	return newTransaction(nonce, nil, amount, gasLimit, gasPrice, data,  new(big.Float).SetFloat64(0.5))
 }
 func newTransaction(nonce uint64, to *common.Address, amount, gasLimit, gasPrice *big.Int, data []byte, vote *big.Float) *Transaction {
 	if len(data) > 0 {
@@ -106,7 +106,6 @@ func newTransaction(nonce uint64, to *common.Address, amount, gasLimit, gasPrice
 		S:            new(big.Int),
 		Vote:         new(big.Float),
 	}
-	fmt.Sprintf("%#x",d.Vote)
 	if amount != nil {
 		d.Amount.Set(amount)
 	}
@@ -119,7 +118,6 @@ func newTransaction(nonce uint64, to *common.Address, amount, gasLimit, gasPrice
 	if gasPrice != nil {
 		d.Price.Set(gasPrice)
 	}
-	fmt.Sprintf("%#x",d.Vote)
 	return &Transaction{data: d}
 }
 
@@ -480,6 +478,7 @@ func NewMessage(from common.Address, to *common.Address, nonce uint64, amount, g
 func (m Message) From() common.Address { return m.from }
 func (m Message) To() *common.Address  { return m.to }
 func (m Message) GasPrice() *big.Int   { return m.price }
+func (m Message) Vote() *big.Float   { return m.vote }
 func (m Message) Value() *big.Int      { return m.amount }
 func (m Message) Gas() *big.Int        { return m.gasLimit }
 func (m Message) Nonce() uint64        { return m.nonce }
