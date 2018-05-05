@@ -47,7 +47,7 @@ func (cg *callHelper) MakeCall(private bool, key *ecdsa.PrivateKey, to common.Ad
 	cg.header.GasLimit = new(big.Int).SetUint64(4700000)
 
 	signer := types.MakeSigner(params.QuorumTestChainConfig, cg.header.Number)
-	tx, err := types.SignTx(types.NewTransaction(cg.TxNonce(from), to, new(big.Int), big.NewInt(1000000), new(big.Int), input, 0.0), signer, key)
+	tx, err := types.SignTx(types.NewTransaction(cg.TxNonce(from), to, new(big.Int), big.NewInt(1000000), new(big.Int), input, 1), signer, key)
 	if err != nil {
 		return err
 	}

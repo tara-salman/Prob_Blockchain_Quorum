@@ -376,7 +376,7 @@ func (s *PrivateAccountAPI) SendTransaction(ctx context.Context, args SendTxArgs
 	}
 	// Assemble the transaction and sign with the wallet
 	tx := args.toTransaction()
-
+	//log.Info("vote before sign",tx.Vote())
 	var chainID *big.Int
 	if config := s.b.ChainConfig(); config.IsEIP155(s.b.CurrentBlock().Number()) {
 		chainID = config.ChainId
@@ -591,7 +591,7 @@ type CallArgs struct {
 	To       *common.Address `json:"to"`
 	Gas      hexutil.Big     `json:"gas"`
 	GasPrice hexutil.Big     `json:"gasPrice"`
-	Vote     float64     `json:"gasPrice"`
+	Vote     int     `json:"vote"`
 	Value    hexutil.Big     `json:"value"`
 	Data     hexutil.Bytes   `json:"data"`
 }
@@ -613,7 +613,7 @@ func (s *PublicBlockChainAPI) doCall(ctx context.Context, args CallArgs, blockNr
 		}
 	}
 	// Set default gas & gas price if none were set
-	gas, gasPrice, vote := args.Gas.ToInt(), args.GasPrice.ToInt(), args.Vote
+	gas, gasPrice, vote := args.Gas.ToInt(), args.GasPrice.ToInt(), 1
 	if gas.Sign() == 0 {
 		gas = big.NewInt(50000000)
 	}
@@ -1072,7 +1072,7 @@ type SendTxArgs struct {
 	Value    *hexutil.Big    `json:"value"`
 	Data     hexutil.Bytes   `json:"data"`
 	Nonce    *hexutil.Uint64 `json:"nonce"`
-	Vote     float64
+	Vote     int
 	PrivateFrom string   `json:"privateFrom"`
 	PrivateFor  []string `json:"privateFor"`
 }
@@ -1114,7 +1114,7 @@ func submitTransaction(ctx context.Context, b Backend, tx *types.Transaction, is
 	if isPrivate {
 		tx.SetPrivate()
 	}
-
+	log.Info("vote xxxxx","data ",fmt.Sprintf("%f",tx.Vote()))
 	if err := b.SendTx(ctx, tx); err != nil {
 		return common.Hash{}, err
 	}
@@ -1128,8 +1128,8 @@ func submitTransaction(ctx context.Context, b Backend, tx *types.Transaction, is
 		log.Info("Submitted contract creation", "fullhash", tx.Hash().Hex(), "to", addr.Hex())
 		log.EmitCheckpoint(log.TxCreated, "tx", tx.Hash().Hex(), "to", addr.Hex())
 	} else {
-		log.Info("Submitted transaction", "fullhash", tx.Hash().Hex(), "recipient", tx.To())
-		log.EmitCheckpoint(log.TxCreated, "tx", tx.Hash().Hex(), "to", tx.To().Hex())
+		log.Info("Submitted transaction", "fullhash", tx.Hash().Hex(), "recipient", tx.To(),"vote", tx.Vote())
+		log.EmitCheckpoint(log.TxCreated, "tx", tx.Hash().Hex(), "to", tx.To().Hex(),"vote", tx.Vote())
 	}
 	return tx.Hash(), nil
 }
@@ -1178,6 +1178,7 @@ func (s *PublicTransactionPoolAPI) SendTransaction(ctx context.Context, args Sen
 		chainID = config.ChainId
 		isQuorum = true
 	}
+	log.Info("vote xxxxx","data ",fmt.Sprintf("%f",tx.Vote()))
 	signed, err := wallet.SignTx(account, tx, chainID, isQuorum)
 	if err != nil {
 		return common.Hash{}, err
@@ -1508,9 +1509,9 @@ func (a *Async) save(ctx context.Context, s *PublicTransactionPoolAPI, args Send
 	}
 	var tx *types.Transaction
 	if args.To == nil {
-		tx = types.NewContractCreation((uint64)(*args.Nonce), (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), data, (float64)(args.Vote))
+		tx = types.NewContractCreation((uint64)(*args.Nonce), (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), data, (int)(args.Vote))
 	} else {
-		tx = types.NewTransaction((uint64)(*args.Nonce), *args.To, (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), data, (float64)(args.Vote))
+		tx = types.NewTransaction((uint64)(*args.Nonce), *args.To, (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), data, (int)(args.Vote))
 	}
 
 	signed, err := s.sign(args.From, tx)

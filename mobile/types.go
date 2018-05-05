@@ -212,7 +212,7 @@ type Transaction struct {
 }
 
 // NewTransaction creates a new transaction with the given properties.
-func NewTransaction(nonce int64, to *Address, amount, gasLimit, gasPrice *BigInt, data []byte, vote float64) *Transaction {
+func NewTransaction(nonce int64, to *Address, amount, gasLimit, gasPrice *BigInt, data []byte, vote int) *Transaction {
 	return &Transaction{types.NewTransaction(uint64(nonce), to.address, amount.bigint, gasLimit.bigint, gasPrice.bigint, common.CopyBytes(data), vote)}
 }
 

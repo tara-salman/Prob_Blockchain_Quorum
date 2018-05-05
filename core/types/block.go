@@ -141,7 +141,7 @@ type Block struct {
 	header       *Header
 	uncles       []*Header
 	transactions Transactions
-	VoteCast []*big.Float
+	VoteCast []*big.Int
 	hash atomic.Value
 	size atomic.Value
 
@@ -173,7 +173,7 @@ type extblock struct {
 	Header *Header
 	Txs    []*Transaction
 	Uncles []*Header
-	VoteCast[]*big.Float
+	VoteCast[]*big.Int
 }
 
 // [deprecated by eth/63]
@@ -183,7 +183,7 @@ type storageblock struct {
 	Txs      []*Transaction
 	Uncles   []*Header
 	TD       *big.Int
-	VoteCast []*big.Float
+	VoteCast []*big.Int
 }
 
 // NewBlock creates a new block. The input data is copied,
@@ -204,7 +204,7 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 		b.transactions = make(Transactions, len(txs))
 		copy(b.transactions, txs)
 	}
-	var votes []*big.Float
+	var votes []*big.Int
 	for _, n := range b.transactions {
 		votes= append(votes,n.data.Vote)
 	}
@@ -462,42 +462,42 @@ func (self blockSorter) Less(i, j int) bool { return self.by(self.blocks[i], sel
 func Number(b1, b2 *Block) bool { return b1.header.Number.Cmp(b2.header.Number) < 0 }
 
 // Mean returns the mean of an integer array as a float
-func Mean(nums [] *big.Float) (mean *big.Float) {
+func Mean(nums [] *big.Int) (mean *big.Int) {
 	if len(nums) == 0 {
-		return new(big.Float).SetInt(big.NewInt(0))
+		return new(big.Int).SetInt(big.NewInt(0))
 	}
 
-	mean = new(big.Float)
+	mean = new(big.Int)
 	for _, n := range nums {
-		mean = new(big.Float).Add(mean,n)
+		mean = new(big.Int).Add(mean,n)
 	}
-	return (new(big.Float).Quo(mean,new(big.Float).SetInt64(int64(len(nums)))))
+	return (new(big.Int).Quo(mean,new(big.Int).SetInt64(int64(len(nums)))))
 }
 
-func StandardDeviation(nums [] *big.Float) (dev *big.Float) {
+func StandardDeviation(nums [] *big.Int) (dev *big.Int) {
 	if len(nums) == 0 {
-		return new(big.Float).SetInt(big.NewInt(0))
+		return new(big.Int).SetInt(big.NewInt(0))
 	}
 
 	m := Mean(nums)
-	dev = new(big.Float)
+	dev = new(big.Int)
 	for _, n := range nums {
 	//	dev += (new(big.Float).SetInt(big.NewInt(n)) - m) * ( new(big.Float).SetInt(big.NewInt(n)) - m)
-		dev= new(big.Float).Add(new(big.Float).Mul(new(big.Float).Sub( n,m), new(big.Float).Sub( n,m)),dev)
+		dev= new(big.Int).Add(new(big.Int).Mul(new(big.Int).Sub( n,m), new(big.Int).Sub( n,m)),dev)
 	}
-	dev = new(big.Float).Quo(dev,new(big.Float).SetInt64(int64(len(nums))))
+	dev = new(big.Int).Quo(dev,new(big.Int).SetInt64(int64(len(nums))))
 	dev = bigfloat.Pow(dev,new(big.Float).SetFloat64(0.5)) //math.Pow(dev/  big.Float(len(nums)), 0.5)
 	return dev
 }
-func NormalConfidenceInterval(nums [] *big.Float) (lower *big.Float, upper *big.Float) {
+func NormalConfidenceInterval(nums [] *big.Int) (lower *big.Int, upper *big.Int) {
 	if len(nums) == 0 {
-		return new(big.Float).SetInt(big.NewInt(0)),new(big.Float).SetInt(big.NewInt(0))
+		return new(big.Int).SetInt(big.NewInt(0)),new(big.Int).SetInt(big.NewInt(0))
 	}
 
 	conf := 1.95996 // 95% confidence for the mean, http://bit.ly/Mm05eZ
 	mean := Mean(nums)
-	dev := new(big.Float).Quo(StandardDeviation(nums),bigfloat.Pow(new(big.Float).SetInt64(int64(len(nums))),new(big.Float).SetFloat64(0.5)))
-	lower = new(big.Float).Sub(mean,new(big.Float).Mul(dev,new(big.Float).SetFloat64(conf)))
-	upper = new(big.Float).Add(mean,new(big.Float).Mul(dev,new(big.Float).SetFloat64(conf)))
+	dev := new(big.Int).Quo(StandardDeviation(nums),bigfloat.Pow(new(big.Float).SetInt64(int64(len(nums))),new(big.Float).SetFloat64(0.5)))
+	lower = new(big.Int).Sub(mean,new(big.Int).Mul(dev,new(big.Int).SetInt64(conf)))
+	upper = new(big.Int).Add(mean,new(big.Int).Mul(dev,new(big.Int).SetInt64(conf)))
 	return lower,upper
 }

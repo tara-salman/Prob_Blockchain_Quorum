@@ -61,7 +61,7 @@ type txdata struct {
 	Recipient    *common.Address `json:"to"       rlp:"nil"` // nil means contract creation
 	Amount       *big.Int        `json:"value"    gencodec:"required"`
 	Payload      []byte          `json:"input"    gencodec:"required"`
-	Vote         *big.Float	     `json:"Vote"     gencodec:"required"`
+	Vote         *big.Int	     `json:"Vote"     gencodec:"required"`
 	// Signature values
 	V *big.Int `json:"v" gencodec:"required"`
 	R *big.Int `json:"r" gencodec:"required"`
@@ -76,21 +76,21 @@ type txdataMarshaling struct {
 	Price        *hexutil.Big
 	GasLimit     *hexutil.Big
 	Amount       *hexutil.Big
-	Vote         *big.Float         
+	Vote         *big.Int         
 	Payload      hexutil.Bytes
 	V            *hexutil.Big
 	R            *hexutil.Big
 	S            *hexutil.Big
 }
 
-func NewTransaction(nonce uint64, to common.Address, amount, gasLimit, gasPrice *big.Int, data []byte, vote float64) *Transaction {
-	return newTransaction(nonce, &to, amount, gasLimit, gasPrice, data, new(big.Float).SetFloat64(0.5))
+func NewTransaction(nonce uint64, to common.Address, amount, gasLimit, gasPrice *big.Int, data []byte, vote int) *Transaction {
+	return newTransaction(nonce, &to, amount, gasLimit, gasPrice, data, new(big.Int).SetInt64(1))
 }
 
-func NewContractCreation(nonce uint64, amount, gasLimit, gasPrice *big.Int, data []byte, vote float64) *Transaction {
-	return newTransaction(nonce, nil, amount, gasLimit, gasPrice, data,  new(big.Float).SetFloat64(0.5))
+func NewContractCreation(nonce uint64, amount, gasLimit, gasPrice *big.Int, data []byte, vote int) *Transaction {
+	return newTransaction(nonce, nil, amount, gasLimit, gasPrice, data,  new(big.Int).SetInt64(1))
 }
-func newTransaction(nonce uint64, to *common.Address, amount, gasLimit, gasPrice *big.Int, data []byte, vote *big.Float) *Transaction {
+func newTransaction(nonce uint64, to *common.Address, amount, gasLimit, gasPrice *big.Int, data []byte, vote *big.Int) *Transaction {
 	if len(data) > 0 {
 		data = common.CopyBytes(data)
 	}
@@ -104,7 +104,7 @@ func newTransaction(nonce uint64, to *common.Address, amount, gasLimit, gasPrice
 		V:            new(big.Int),
 		R:            new(big.Int),
 		S:            new(big.Int),
-		Vote:         new(big.Float),
+		Vote:         new(big.Int),
 	}
 	if amount != nil {
 		d.Amount.Set(amount)
@@ -190,7 +190,7 @@ func (tx *Transaction) Data() []byte       { return common.CopyBytes(tx.data.Pay
 func (tx *Transaction) Gas() *big.Int      { return new(big.Int).Set(tx.data.GasLimit) }
 func (tx *Transaction) GasPrice() *big.Int { return new(big.Int).Set(tx.data.Price) }
 func (tx *Transaction) Value() *big.Int    { return new(big.Int).Set(tx.data.Amount) }
-func (tx *Transaction) Vote() *big.Float    { return tx.data.Vote }
+func (tx *Transaction) Vote() *big.Int    { return new(big.Int).Set(tx.data.Vote) }
 func (tx *Transaction) Nonce() uint64      { return tx.data.AccountNonce }
 func (tx *Transaction) CheckNonce() bool   { return true }
 
@@ -241,7 +241,7 @@ func (tx *Transaction) AsMessage(s Signer) (Message, error) {
 		data:       tx.data.Payload,
 		checkNonce: true,
 		isPrivate:  tx.IsPrivate(),
-		vote:       tx.data.Vote,
+		vote:       new(big.Int).Set(tx.data.Vote),
 	}
 
 	var err error
@@ -456,19 +456,19 @@ type Message struct {
 	nonce                   uint64
 	amount, price, gasLimit *big.Int
 	data                    []byte
-	vote                    *big.Float
+	vote                    *big.Int
 	checkNonce              bool
 	isPrivate               bool
 }
 
-func NewMessage(from common.Address, to *common.Address, nonce uint64, amount, gasLimit, price *big.Int, data []byte, checkNonce bool, vote float64) Message {
+func NewMessage(from common.Address, to *common.Address, nonce uint64, amount, gasLimit, price *big.Int, data []byte, checkNonce bool, vote int) Message {
 	return Message{
 		from:       from,
 		to:         to,
 		nonce:      nonce,
 		amount:     amount,
 		price:      price,
-		vote:       new(big.Float).SetFloat64(vote),
+		vote:       new(big.Int).SetInt64(1),
 		gasLimit:   gasLimit,
 		data:       data,
 		checkNonce: checkNonce,
@@ -478,7 +478,7 @@ func NewMessage(from common.Address, to *common.Address, nonce uint64, amount, g
 func (m Message) From() common.Address { return m.from }
 func (m Message) To() *common.Address  { return m.to }
 func (m Message) GasPrice() *big.Int   { return m.price }
-func (m Message) Vote() *big.Float   { return m.vote }
+func (m Message) Vote() *big.Int   { return m.vote }
 func (m Message) Value() *big.Int      { return m.amount }
 func (m Message) Gas() *big.Int        { return m.gasLimit }
 func (m Message) Nonce() uint64        { return m.nonce }

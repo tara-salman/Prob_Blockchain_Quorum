@@ -19,7 +19,7 @@ package eth
 import (
 	"context"
 	"math/big"
-
+	"fmt"
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
@@ -34,6 +34,7 @@ import (
 	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 // EthApiBackend implements ethapi.Backend for full nodes
@@ -152,6 +153,7 @@ func (b *EthApiBackend) SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscri
 }
 
 func (b *EthApiBackend) SendTx(ctx context.Context, signedTx *types.Transaction) error {
+	log.Info("vote at api-backend","data ",fmt.Sprintf("%f",signedTx.Vote()))
 	return b.eth.txPool.AddLocal(signedTx)
 }
 

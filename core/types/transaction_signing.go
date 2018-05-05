@@ -21,7 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
-
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/params"
@@ -73,6 +73,7 @@ func SignTx(tx *Transaction, s Signer, prv *ecdsa.PrivateKey) (*Transaction, err
 // signing method. The cache is invalidated if the cached signer does
 // not match the signer used in the current call.
 func Sender(signer Signer, tx *Transaction) (common.Address, error) {
+        log.Info("vote at Sender 1 ","data ",fmt.Sprintf("%f",tx.Vote()))
 	if sc := tx.from.Load(); sc != nil {
 		sigCache := sc.(sigCache)
 		// If the signer used to derive from in a previous
@@ -82,7 +83,7 @@ func Sender(signer Signer, tx *Transaction) (common.Address, error) {
 			return sigCache.from, nil
 		}
 	}
-
+        log.Info("vote at Sender 2 ","data ",fmt.Sprintf("%f",tx.Vote()))
 	addr, err := signer.Sender(tx)
 	if err != nil {
 		return common.Address{}, err
@@ -183,6 +184,8 @@ func (hs HomesteadSigner) SignatureValues(tx *Transaction, sig []byte) (r, s, v 
 }
 
 func (hs HomesteadSigner) Sender(tx *Transaction) (common.Address, error) {
+        log.Info("vote at sender 3 ","data ",fmt.Sprintf("%f",tx.data.Vote))
+
 	return recoverPlain(hs.Hash(tx), tx.data.R, tx.data.S, tx.data.V, true, tx.IsPrivate())
 }
 

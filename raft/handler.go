@@ -860,7 +860,7 @@ func (pm *ProtocolManager) applyNewChainHead(block *types.Block) {
 		}
 
 		for _, tx := range block.Transactions() {
-			log.EmitCheckpoint(log.TxAccepted, "tx", tx.Hash().Hex())
+			log.EmitCheckpoint(log.TxAccepted, "tx", tx.Hash().Hex(), "vote", tx.Vote())
 		}
 
 		_, err := pm.blockchain.InsertChain([]*types.Block{block})

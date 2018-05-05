@@ -685,6 +685,7 @@ func (pool *TxPool) enqueueTx(hash common.Hash, tx *types.Transaction) (bool, er
 		pool.priced.Removed()
 		queuedReplaceCounter.Inc(1)
 	}
+	log.Info("vote at enqueue tx_pool","data ",fmt.Sprintf("%f",tx.Vote()))
 	pool.all[hash] = tx
 	pool.priced.Put(tx)
 	return old != nil, nil
@@ -743,6 +744,7 @@ func (pool *TxPool) promoteTx(addr common.Address, hash common.Hash, tx *types.T
 // the sender as a local one in the mean time, ensuring it goes around the local
 // pricing constraints.
 func (pool *TxPool) AddLocal(tx *types.Transaction) error {
+	log.Info("vote at addLocal tx_pool","data ",fmt.Sprintf("%f",tx.Vote()))
 	return pool.addTx(tx, !pool.config.NoLocals)
 }
 
@@ -750,6 +752,7 @@ func (pool *TxPool) AddLocal(tx *types.Transaction) error {
 // sender is not among the locally tracked ones, full pricing constraints will
 // apply.
 func (pool *TxPool) AddRemote(tx *types.Transaction) error {
+	log.Info("vote at addremote tx_pool","data ",fmt.Sprintf("%f",tx.Vote()))
 	return pool.addTx(tx, false)
 }
 
@@ -777,10 +780,12 @@ func (pool *TxPool) addTx(tx *types.Transaction, local bool) error {
 	if err != nil {
 		return err
 	}
+	//log.Info("vote at addLocal tx_pool","data ",fmt.Sprintf("%f",replace.Vote()))
 	// If we added a new transaction, run promotion checks and return
 	if !replace {
 		from, _ := types.Sender(pool.signer, tx) // already validated
 		pool.promoteExecutables([]common.Address{from})
+		log.Info("vote at addTx tx_pool","data ",fmt.Sprintf("%f",tx.Vote()))
 	}
 	return nil
 }

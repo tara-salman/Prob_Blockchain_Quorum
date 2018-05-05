@@ -52,7 +52,7 @@ type TransactOpts struct {
 	Value    *big.Int // Funds to transfer along along the transaction (nil = 0 = no funds)
 	GasPrice *big.Int // Gas price to use for the transaction execution (nil = gas price oracle)
 	GasLimit *big.Int // Gas limit to set for the transaction execution (nil = estimate + 10%)
-	Vote      float64
+	Vote      int
 	Context context.Context // Network context to support cancellation and timeouts (nil = no timeout)
 }
 
@@ -183,7 +183,7 @@ func (c *BoundContract) transact(opts *TransactOpts, contract *common.Address, i
 	}
 	vote := opts.Vote
 	if vote == 0 {
-		vote = 0.5
+		vote = 0
 	} 
 	// Figure out the gas allowance and gas price values
 	gasPrice := opts.GasPrice
