@@ -25,7 +25,7 @@ import (
 	"sort"
 	"sync/atomic"
 	"time"
-	"github.com/bigfloat"
+	//"github.com/bigfloat"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto/sha3"
@@ -464,7 +464,7 @@ func Number(b1, b2 *Block) bool { return b1.header.Number.Cmp(b2.header.Number) 
 // Mean returns the mean of an integer array as a float
 func Mean(nums [] *big.Int) (mean *big.Int) {
 	if len(nums) == 0 {
-		return new(big.Int).SetInt(big.NewInt(0))
+		return big.NewInt(0)
 	}
 
 	mean = new(big.Int)
@@ -476,7 +476,7 @@ func Mean(nums [] *big.Int) (mean *big.Int) {
 
 func StandardDeviation(nums [] *big.Int) (dev *big.Int) {
 	if len(nums) == 0 {
-		return new(big.Int).SetInt(big.NewInt(0))
+		return big.NewInt(0)
 	}
 
 	m := Mean(nums)
@@ -486,18 +486,18 @@ func StandardDeviation(nums [] *big.Int) (dev *big.Int) {
 		dev= new(big.Int).Add(new(big.Int).Mul(new(big.Int).Sub( n,m), new(big.Int).Sub( n,m)),dev)
 	}
 	dev = new(big.Int).Quo(dev,new(big.Int).SetInt64(int64(len(nums))))
-	dev = bigfloat.Pow(dev,new(big.Float).SetFloat64(0.5)) //math.Pow(dev/  big.Float(len(nums)), 0.5)
+	dev = new(big.Int).Sqrt(dev)//bigfloat.Pow(dev,new(big.Float).SetFloat64(0.5)) //math.Pow(dev/  big.Float(len(nums)), 0.5)
 	return dev
 }
 func NormalConfidenceInterval(nums [] *big.Int) (lower *big.Int, upper *big.Int) {
 	if len(nums) == 0 {
-		return new(big.Int).SetInt(big.NewInt(0)),new(big.Int).SetInt(big.NewInt(0))
+		return big.NewInt(0),big.NewInt(0)
 	}
 
 	conf := 1.95996 // 95% confidence for the mean, http://bit.ly/Mm05eZ
 	mean := Mean(nums)
-	dev := new(big.Int).Quo(StandardDeviation(nums),bigfloat.Pow(new(big.Float).SetInt64(int64(len(nums))),new(big.Float).SetFloat64(0.5)))
-	lower = new(big.Int).Sub(mean,new(big.Int).Mul(dev,new(big.Int).SetInt64(conf)))
-	upper = new(big.Int).Add(mean,new(big.Int).Mul(dev,new(big.Int).SetInt64(conf)))
+	dev := new(big.Int).Quo(StandardDeviation(nums),new(big.Int).Sqrt(big.NewInt(int64(len(nums)))))
+	lower = new(big.Int).Sub(mean,new(big.Int).Mul(dev,big.NewInt(int64(conf))))
+	upper = new(big.Int).Add(mean,new(big.Int).Mul(dev,big.NewInt(int64(conf))))
 	return lower,upper
 }

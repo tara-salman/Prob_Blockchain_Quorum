@@ -820,7 +820,7 @@ type RPCTransaction struct {
 	From             common.Address  `json:"from"`
 	Gas              *hexutil.Big    `json:"gas"`
 	GasPrice         *hexutil.Big    `json:"gasPrice"`
-	Vote		 *big.Float         `json:"Vote"`
+	Vote		 *big.Int         `json:"Vote"`
 	Hash             common.Hash     `json:"hash"`
 	Input            hexutil.Bytes   `json:"input"`
 	Nonce            hexutil.Uint64  `json:"nonce"`
