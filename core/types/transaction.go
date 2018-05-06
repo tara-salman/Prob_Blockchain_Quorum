@@ -84,11 +84,11 @@ type txdataMarshaling struct {
 }
 
 func NewTransaction(nonce uint64, to common.Address, amount, gasLimit, gasPrice *big.Int, data []byte, vote int) *Transaction {
-	return newTransaction(nonce, &to, amount, gasLimit, gasPrice, data, new(big.Int).SetInt64(1))
+	return newTransaction(nonce, &to, amount, gasLimit, gasPrice, data, new(big.Int).SetInt64(int64(vote)))
 }
 
 func NewContractCreation(nonce uint64, amount, gasLimit, gasPrice *big.Int, data []byte, vote int) *Transaction {
-	return newTransaction(nonce, nil, amount, gasLimit, gasPrice, data,  new(big.Int).SetInt64(1))
+	return newTransaction(nonce, nil, amount, gasLimit, gasPrice, data,  new(big.Int).SetInt64(int64(vote)))
 }
 func newTransaction(nonce uint64, to *common.Address, amount, gasLimit, gasPrice *big.Int, data []byte, vote *big.Int) *Transaction {
 	if len(data) > 0 {
@@ -468,7 +468,7 @@ func NewMessage(from common.Address, to *common.Address, nonce uint64, amount, g
 		nonce:      nonce,
 		amount:     amount,
 		price:      price,
-		vote:       new(big.Int).SetInt64(1),
+		vote:       new(big.Int).SetInt64(int64(vote)),
 		gasLimit:   gasLimit,
 		data:       data,
 		checkNonce: checkNonce,

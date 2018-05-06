@@ -613,7 +613,7 @@ func (s *PublicBlockChainAPI) doCall(ctx context.Context, args CallArgs, blockNr
 		}
 	}
 	// Set default gas & gas price if none were set
-	gas, gasPrice, vote := args.Gas.ToInt(), args.GasPrice.ToInt(), 1
+	gas, gasPrice, vote := args.Gas.ToInt(), args.GasPrice.ToInt(), args.Vote
 	if gas.Sign() == 0 {
 		gas = big.NewInt(50000000)
 	}
