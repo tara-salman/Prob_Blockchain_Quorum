@@ -25,6 +25,7 @@ import (
 	"sort"
 	"sync/atomic"
 	"time"
+	"github.com/ethereum/go-ethereum/log"
 	//"github.com/bigfloat"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -206,9 +207,9 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 	}
 	var votes []*big.Int
 	for _, n := range b.transactions {
-		votes= append(votes,n.data.Vote)
+		votes= append(votes,n.Vote())
 	}
-	fmt.Println ("hello")
+	//fmt.Println ("hello")
 	mean := Mean(votes)
 	b.VoteCast= append(b.VoteCast,mean)
 	std := StandardDeviation(votes)
@@ -217,7 +218,7 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 	//ci = "["+lower.String()+","+upper.String()+"]"
 	//VoteCast= [mean, std, ci]
 	// caches
-
+	log.Info("Vote cast at block is", "data ",fmt.Sprintf("%x",b.VoteCast))
 	if len(receipts) == 0 {
 		b.header.ReceiptHash = EmptyRootHash
 	} else {
