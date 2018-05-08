@@ -321,7 +321,7 @@ func (b *Block) GasLimit() *big.Int   { return new(big.Int).Set(b.header.GasLimi
 func (b *Block) GasUsed() *big.Int    { return new(big.Int).Set(b.header.GasUsed) }
 func (b *Block) Difficulty() *big.Int { return new(big.Int).Set(b.header.Difficulty) }
 func (b *Block) Time() *big.Int       { return new(big.Int).Set(b.header.Time) }
-func (b *Block) VoteCastCall() *big.Int {return b.VoteCastMean}
+func (b *Block) VoteCastCall() *big.Int {return new(big.Int).Set(b.VoteCastMean)}
 func (b *Block) NumberU64() uint64        { return b.header.Number.Uint64() }
 func (b *Block) MixDigest() common.Hash   { return b.header.MixDigest }
 func (b *Block) Nonce() uint64            { return binary.BigEndian.Uint64(b.header.Nonce[:]) }
