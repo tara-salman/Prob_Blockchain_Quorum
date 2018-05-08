@@ -289,6 +289,7 @@ func (b *Block) EncodeRLP(w io.Writer) error {
 		Header: b.header,
 		Txs:    b.transactions,
 		Uncles: b.uncles,
+		VoteCastMean: b.VoteCastMean,
 	})
 }
 
