@@ -278,7 +278,7 @@ func (b *Block) DecodeRLP(s *rlp.Stream) error {
 	if err := s.Decode(&eb); err != nil {
 		return err
 	}
-	b.header, b.uncles, b.transactions = eb.Header, eb.Uncles, eb.Txs
+	b.header, b.uncles, b.transactions, b.VoteCastMean= eb.Header, eb.Uncles, eb.Txs, eb.VoteCastMean
 	b.size.Store(common.StorageSize(rlp.ListSize(size)))
 	return nil
 }
