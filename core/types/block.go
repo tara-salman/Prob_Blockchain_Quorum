@@ -142,7 +142,7 @@ type Block struct {
 	header       *Header
 	uncles       []*Header
 	transactions Transactions
-	VoteCast []*big.Int
+	VoteCastMean *big.Int
 	hash atomic.Value
 	size atomic.Value
 
@@ -174,7 +174,7 @@ type extblock struct {
 	Header *Header
 	Txs    []*Transaction
 	Uncles []*Header
-	VoteCast[]*big.Int
+	VoteCastMean *big.Int
 }
 
 // [deprecated by eth/63]
@@ -184,7 +184,7 @@ type storageblock struct {
 	Txs      []*Transaction
 	Uncles   []*Header
 	TD       *big.Int
-	VoteCast []*big.Int
+	VoteCastMean *big.Int
 }
 
 // NewBlock creates a new block. The input data is copied,
@@ -210,15 +210,14 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 		votes= append(votes,n.Vote())
 	}
 	//fmt.Println ("hello")
-	mean := Mean(votes)
-	b.VoteCast= append(b.VoteCast,mean)
-	std := StandardDeviation(votes)
-	b.VoteCast= append(b.VoteCast,std)
+	b.VoteCastMean = Mean(votes)
+	//std := StandardDeviation(votes)
+	//b.VoteCast= append(b.VoteCast,std)
 	//lower, upper := NormalConfidenceInterval(ciphertexts)
 	//ci = "["+lower.String()+","+upper.String()+"]"
 	//VoteCast= [mean, std, ci]
 	// caches
-	log.Info("Vote cast at block is", "data ",fmt.Sprintf("%x",b.VoteCast))
+	log.Info("Vote cast at block is", "data ",fmt.Sprintf("%x",b.VoteCastMean))
 	if len(receipts) == 0 {
 		b.header.ReceiptHash = EmptyRootHash
 	} else {
@@ -322,7 +321,7 @@ func (b *Block) GasLimit() *big.Int   { return new(big.Int).Set(b.header.GasLimi
 func (b *Block) GasUsed() *big.Int    { return new(big.Int).Set(b.header.GasUsed) }
 func (b *Block) Difficulty() *big.Int { return new(big.Int).Set(b.header.Difficulty) }
 func (b *Block) Time() *big.Int       { return new(big.Int).Set(b.header.Time) }
-func (b *Block) VoteCastCall() []*big.Int {return b.VoteCast}
+func (b *Block) VoteCastCall() *big.Int {return b.VoteCastMean}
 func (b *Block) NumberU64() uint64        { return b.header.Number.Uint64() }
 func (b *Block) MixDigest() common.Hash   { return b.header.MixDigest }
 func (b *Block) Nonce() uint64            { return binary.BigEndian.Uint64(b.header.Nonce[:]) }
@@ -412,7 +411,7 @@ Uncles:
 %v
 VoteCast:
 }
-`, b.Number(), b.Size(), b.header.HashNoNonce(), b.header, b.transactions, b.uncles, b.VoteCast)
+`, b.Number(), b.Size(), b.header.HashNoNonce(), b.header, b.transactions, b.uncles, b.VoteCastMean)
 	return str
 }
 
