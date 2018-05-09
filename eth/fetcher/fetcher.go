@@ -95,7 +95,7 @@ type bodyFilterTask struct {
 	transactions [][]*types.Transaction // Collection of transactions per block bodies
 	uncles       [][]*types.Header      // Collection of uncles per block bodies
 	time         time.Time              // Arrival time of the blocks' contents
-	voteCast    []*big.Int
+	voteCast    [][]*big.Int
 }
 
 // inject represents a schedules import operation.

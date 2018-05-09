@@ -544,7 +544,7 @@ func (ethash *Ethash) Finalize(chain consensus.ChainReader, header *types.Header
 	AccumulateRewards(chain.Config(), state, header, uncles)
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	block := types.NewBlock(header, txs, uncles, receipts)
-	log.Info ("Vote cast at consensus is", "data ",fmt.Sprintf("%d",block.VoteCastMean))
+	log.Info ("Vote cast at consensus is", "data ",fmt.Sprintf("%d",block.VoteCast))
 	// Header seems complete, assemble into a block and return
 	return block, nil
 }

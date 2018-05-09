@@ -869,7 +869,7 @@ func (pm *ProtocolManager) applyNewChainHead(block *types.Block) {
 			panic(fmt.Sprintf("failed to extend chain: %s", err.Error()))
 		}
 
-		log.EmitCheckpoint(log.BlockCreated, "block", fmt.Sprintf("%x %d", block.Hash(),block.VoteCastMean))
+		log.EmitCheckpoint(log.BlockCreated, "block", fmt.Sprintf("%x %d", block.Hash(),block.VoteCast))
 	}
 }
 

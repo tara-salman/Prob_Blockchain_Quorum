@@ -57,7 +57,7 @@ type fetchResult struct {
 	Uncles       []*types.Header
 	Transactions types.Transactions
 	Receipts     types.Receipts
-	VoteCast     *big.Int
+	VoteCast     [] *big.Int
 }
 
 // queue represents hashes that are either need fetching or are being fetched

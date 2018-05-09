@@ -134,7 +134,7 @@ func rlpHash(x interface{}) (h common.Hash) {
 type Body struct {
 	Transactions []*Transaction
 	Uncles       []*Header
-	VoteCast     *big.Int
+	VoteCast     []*big.Int
 }
 
 // Block represents an entire block in the Ethereum blockchain.
@@ -142,7 +142,7 @@ type Block struct {
 	header       *Header
 	uncles       []*Header
 	transactions Transactions
-	VoteCastMean *big.Int
+	VoteCast []*big.Int
 	hash atomic.Value
 	size atomic.Value
 
@@ -174,7 +174,7 @@ type extblock struct {
 	Header *Header
 	Txs    []*Transaction
 	Uncles []*Header
-	VoteCastMean *big.Int
+	VoteCast []*big.Int
 }
 
 // [deprecated by eth/63]
@@ -184,7 +184,7 @@ type storageblock struct {
 	Txs      []*Transaction
 	Uncles   []*Header
 	TD       *big.Int
-	VoteCastMean *big.Int
+	VoteCast []*big.Int
 }
 
 // NewBlock creates a new block. The input data is copied,
@@ -210,14 +210,14 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 		votes= append(votes,n.Vote())
 	}
 	//fmt.Println ("hello")
-	b.VoteCastMean = Mean(votes)
-	//std := StandardDeviation(votes)
-	//b.VoteCast= append(b.VoteCast,std)
+	b.VoteCast= append(b.VoteCast,Mean(votes))
+	std := StandardDeviation(votes)
+	b.VoteCast= append(b.VoteCast,std)
 	//lower, upper := NormalConfidenceInterval(ciphertexts)
 	//ci = "["+lower.String()+","+upper.String()+"]"
 	//VoteCast= [mean, std, ci]
 	// caches
-	log.Info("Vote cast at block is", "data ",fmt.Sprintf("%d",b.VoteCastMean))
+	log.Info("Vote cast at block is", "data ",fmt.Sprintf("%d",b.VoteCast))
 	if len(receipts) == 0 {
 		b.header.ReceiptHash = EmptyRootHash
 	} else {
@@ -278,7 +278,7 @@ func (b *Block) DecodeRLP(s *rlp.Stream) error {
 	if err := s.Decode(&eb); err != nil {
 		return err
 	}
-	b.header, b.uncles, b.transactions, b.VoteCastMean= eb.Header, eb.Uncles, eb.Txs, eb.VoteCastMean
+	b.header, b.uncles, b.transactions, b.VoteCast= eb.Header, eb.Uncles, eb.Txs, eb.VoteCast
 	b.size.Store(common.StorageSize(rlp.ListSize(size)))
 	return nil
 }
@@ -290,7 +290,7 @@ func (b *Block) EncodeRLP(w io.Writer) error {
 		Header: b.header,
 		Txs:    b.transactions,
 		Uncles: b.uncles,
-		VoteCastMean: b.VoteCastMean,
+		VoteCast: b.VoteCast,
 	})
 }
 
@@ -335,17 +335,17 @@ func (b *Block) ReceiptHash() common.Hash { return b.header.ReceiptHash }
 func (b *Block) UncleHash() common.Hash   { return b.header.UncleHash }
 func (b *Block) Extra() []byte            { return common.CopyBytes(b.header.Extra) }
 
-func (b *Block) VoteCastCall() *big.Int {
-	log.Info("Vote cast at votecastcall is", "data ",fmt.Sprintf("%d",b.VoteCastMean))
-	if votecast:=b.VoteCastMean; votecast!=nil{
-		return new(big.Int).Set(votecast)
+func (b *Block) VoteCastCall() []*big.Int {
+	log.Info("Vote cast at votecastcall is", "data ",fmt.Sprintf("%d",b.VoteCast))
+	if votecast:=b.VoteCast; votecast!=nil{
+		return votecast
 	}
 	return nil
 }
 func (b *Block) Header() *Header { return CopyHeader(b.header) }
 
 // Body returns the non-header content of the block.
-func (b *Block) Body() *Body { return &Body{b.transactions, b.uncles, b.VoteCastMean} }
+func (b *Block) Body() *Body { return &Body{b.transactions, b.uncles, b.VoteCast} }
 
 func (b *Block) HashNoNonce() common.Hash {
 	return b.header.HashNoNonce()
@@ -385,12 +385,12 @@ func (b *Block) WithSeal(header *Header) *Block {
 }
 
 // WithBody returns a new block with the given transaction and uncle contents.
-func (b *Block) WithBody(transactions []*Transaction, uncles []*Header, voteCast *big.Int) *Block {
+func (b *Block) WithBody(transactions []*Transaction, uncles []*Header, voteCast []*big.Int) *Block {
 	block := &Block{
 		header:       CopyHeader(b.header),
 		transactions: make([]*Transaction, len(transactions)),
 		uncles:       make([]*Header, len(uncles)),
-		VoteCastMean:     voteCast,
+		VoteCast:     voteCast,
 	}
 	copy(block.transactions, transactions)
 	for i := range uncles {
@@ -420,7 +420,7 @@ Uncles:
 %v
 VoteCast:
 }
-`, b.Number(), b.Size(), b.header.HashNoNonce(), b.header, b.transactions, b.uncles, b.VoteCastMean)
+`, b.Number(), b.Size(), b.header.HashNoNonce(), b.header, b.transactions, b.uncles, b.VoteCast)
 	return str
 }
 
