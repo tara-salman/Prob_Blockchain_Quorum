@@ -570,9 +570,11 @@ func (bc *BlockChain) GetBlock(hash common.Hash, number uint64) *types.Block {
 		return block.(*types.Block)
 	}
 	block := GetBlock(bc.chainDb, hash, number)
+	//log.Info("Vote cast at block is", "data ",fmt.Sprintf("%d",block.VoteCastCall()))
 	if block == nil {
 		return nil
 	}
+        log.Info("Vote cast at block is", "data ",fmt.Sprintf("%d",block.VoteCastCall()))
 	// Cache the found block for next time and return
 	bc.blockCache.Add(block.Hash(), block)
 	return block

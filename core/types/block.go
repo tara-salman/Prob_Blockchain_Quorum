@@ -134,7 +134,7 @@ func rlpHash(x interface{}) (h common.Hash) {
 type Body struct {
 	Transactions []*Transaction
 	Uncles       []*Header
-	//VoteCast     []*big.Float
+	VoteCast     *big.Int
 }
 
 // Block represents an entire block in the Ethereum blockchain.
@@ -217,7 +217,7 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 	//ci = "["+lower.String()+","+upper.String()+"]"
 	//VoteCast= [mean, std, ci]
 	// caches
-	log.Info("Vote cast at block is", "data ",fmt.Sprintf("%x",b.VoteCastMean))
+	log.Info("Vote cast at block is", "data ",fmt.Sprintf("%d",b.VoteCastMean))
 	if len(receipts) == 0 {
 		b.header.ReceiptHash = EmptyRootHash
 	} else {
@@ -234,7 +234,7 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 			b.uncles[i] = CopyHeader(uncles[i])
 		}
 	}
-
+        //log.Info("Vote cast at block is", "data ",fmt.Sprintf("%d",b.VoteCastCall()))
 	return b
 }
 
@@ -285,6 +285,7 @@ func (b *Block) DecodeRLP(s *rlp.Stream) error {
 
 // EncodeRLP serializes b into the Ethereum RLP block format.
 func (b *Block) EncodeRLP(w io.Writer) error {
+	log.Info("Vote cast at rlp encoding is", "data ",fmt.Sprintf("%d",b.VoteCastCall()))
 	return rlp.Encode(w, extblock{
 		Header: b.header,
 		Txs:    b.transactions,
@@ -322,7 +323,6 @@ func (b *Block) GasLimit() *big.Int   { return new(big.Int).Set(b.header.GasLimi
 func (b *Block) GasUsed() *big.Int    { return new(big.Int).Set(b.header.GasUsed) }
 func (b *Block) Difficulty() *big.Int { return new(big.Int).Set(b.header.Difficulty) }
 func (b *Block) Time() *big.Int       { return new(big.Int).Set(b.header.Time) }
-func (b *Block) VoteCastCall() *big.Int {return new(big.Int).Set(b.VoteCastMean)}
 func (b *Block) NumberU64() uint64        { return b.header.Number.Uint64() }
 func (b *Block) MixDigest() common.Hash   { return b.header.MixDigest }
 func (b *Block) Nonce() uint64            { return binary.BigEndian.Uint64(b.header.Nonce[:]) }
@@ -335,10 +335,17 @@ func (b *Block) ReceiptHash() common.Hash { return b.header.ReceiptHash }
 func (b *Block) UncleHash() common.Hash   { return b.header.UncleHash }
 func (b *Block) Extra() []byte            { return common.CopyBytes(b.header.Extra) }
 
+func (b *Block) VoteCastCall() *big.Int {
+	log.Info("Vote cast at votecastcall is", "data ",fmt.Sprintf("%d",b.VoteCastMean))
+	if votecast:=b.VoteCastMean; votecast!=nil{
+		return new(big.Int).Set(votecast)
+	}
+	return nil
+}
 func (b *Block) Header() *Header { return CopyHeader(b.header) }
 
 // Body returns the non-header content of the block.
-func (b *Block) Body() *Body { return &Body{b.transactions, b.uncles} }
+func (b *Block) Body() *Body { return &Body{b.transactions, b.uncles, b.VoteCastMean} }
 
 func (b *Block) HashNoNonce() common.Hash {
 	return b.header.HashNoNonce()

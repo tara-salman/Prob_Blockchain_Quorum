@@ -23,7 +23,7 @@ import (
 	"math/big"
 	"runtime"
 	"time"
-
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/consensus"
@@ -543,9 +543,10 @@ func (ethash *Ethash) Finalize(chain consensus.ChainReader, header *types.Header
 	// Accumulate any block and uncle rewards and commit the final state root
 	AccumulateRewards(chain.Config(), state, header, uncles)
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
-
+	block := types.NewBlock(header, txs, uncles, receipts)
+	log.Info ("Vote cast at consensus is", "data ",fmt.Sprintf("%d",block.VoteCastMean))
 	// Header seems complete, assemble into a block and return
-	return types.NewBlock(header, txs, uncles, receipts), nil
+	return block, nil
 }
 
 // Some weird constants to avoid constant memory allocs for them.
