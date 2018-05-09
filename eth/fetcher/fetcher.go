@@ -21,7 +21,7 @@ import (
 	"errors"
 	"math/rand"
 	"time"
-
+	"math/big"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/consensus"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -95,6 +95,7 @@ type bodyFilterTask struct {
 	transactions [][]*types.Transaction // Collection of transactions per block bodies
 	uncles       [][]*types.Header      // Collection of uncles per block bodies
 	time         time.Time              // Arrival time of the blocks' contents
+	voteCast    []*big.Int
 }
 
 // inject represents a schedules import operation.
@@ -530,7 +531,7 @@ func (f *Fetcher) loop() {
 							matched = true
 
 							if f.getBlock(hash) == nil {
-								block := types.NewBlockWithHeader(announce.header).WithBody(task.transactions[i], task.uncles[i])
+								block := types.NewBlockWithHeader(announce.header).WithBody(task.transactions[i], task.uncles[i],task.voteCast[i])
 								block.ReceivedAt = task.time
 
 								blocks = append(blocks, block)

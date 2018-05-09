@@ -24,7 +24,7 @@ import (
 	"fmt"
 	"sync"
 	"time"
-
+	"math/big"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
@@ -57,6 +57,7 @@ type fetchResult struct {
 	Uncles       []*types.Header
 	Transactions types.Transactions
 	Receipts     types.Receipts
+	VoteCast     *big.Int
 }
 
 // queue represents hashes that are either need fetching or are being fetched

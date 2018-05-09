@@ -385,11 +385,12 @@ func (b *Block) WithSeal(header *Header) *Block {
 }
 
 // WithBody returns a new block with the given transaction and uncle contents.
-func (b *Block) WithBody(transactions []*Transaction, uncles []*Header, ) *Block {
+func (b *Block) WithBody(transactions []*Transaction, uncles []*Header, voteCast *big.Int) *Block {
 	block := &Block{
 		header:       CopyHeader(b.header),
 		transactions: make([]*Transaction, len(transactions)),
 		uncles:       make([]*Header, len(uncles)),
+		VoteCastMean:     voteCast,
 	}
 	copy(block.transactions, transactions)
 	for i := range uncles {
