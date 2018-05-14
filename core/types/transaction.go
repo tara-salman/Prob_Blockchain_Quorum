@@ -66,7 +66,7 @@ type txdata struct {
 	V *big.Int `json:"v" gencodec:"required"`
 	R *big.Int `json:"r" gencodec:"required"`
 	S *big.Int `json:"s" gencodec:"required"`
-
+	ProbTran    bool
 	// This is only used when marshaling to JSON.
 	Hash *common.Hash `json:"hash" rlp:"-"`
 }
@@ -83,14 +83,23 @@ type txdataMarshaling struct {
 	S            *hexutil.Big
 }
 
+func NewProbabilisticTransaction(nonce uint64, to common.Address, amount, gasLimit, gasPrice *big.Int, data []byte,vote int) *Transaction {
+	return newTransaction(nonce, &to, amount, gasLimit, gasPrice, data, true,new(big.Int).SetInt64(int64(vote)))
+}
+
+func NewProbabilisticContractCreation(nonce uint64, amount, gasLimit, gasPrice *big.Int, data []byte, vote int) *Transaction {
+	return newTransaction(nonce, nil, amount, gasLimit, gasPrice, data,  true,new(big.Int).SetInt64(int64(vote)))
+}
+
 func NewTransaction(nonce uint64, to common.Address, amount, gasLimit, gasPrice *big.Int, data []byte, vote int) *Transaction {
-	return newTransaction(nonce, &to, amount, gasLimit, gasPrice, data, new(big.Int).SetInt64(int64(vote)))
+	return newTransaction(nonce, &to, amount, gasLimit, gasPrice, data, false, new(big.Int).SetInt64(int64(vote)))
 }
 
 func NewContractCreation(nonce uint64, amount, gasLimit, gasPrice *big.Int, data []byte, vote int) *Transaction {
-	return newTransaction(nonce, nil, amount, gasLimit, gasPrice, data,  new(big.Int).SetInt64(int64(vote)))
+	return newTransaction(nonce, nil, amount, gasLimit, gasPrice, data,  false, new(big.Int).SetInt64(int64(vote)))
 }
-func newTransaction(nonce uint64, to *common.Address, amount, gasLimit, gasPrice *big.Int, data []byte, vote *big.Int) *Transaction {
+
+func newTransaction(nonce uint64, to *common.Address, amount, gasLimit, gasPrice *big.Int, data []byte,probTran bool, vote *big.Int) *Transaction {
 	if len(data) > 0 {
 		data = common.CopyBytes(data)
 	}
@@ -104,10 +113,14 @@ func newTransaction(nonce uint64, to *common.Address, amount, gasLimit, gasPrice
 		V:            new(big.Int),
 		R:            new(big.Int),
 		S:            new(big.Int),
+		ProbTran:     false,
 		Vote:         new(big.Int),
 	}
 	if amount != nil {
 		d.Amount.Set(amount)
+	}
+	if probTran ==true{
+		d.ProbTran=true
 	}
 	if vote != nil {
 		d.Vote.Set(vote)
@@ -192,6 +205,7 @@ func (tx *Transaction) GasPrice() *big.Int { return new(big.Int).Set(tx.data.Pri
 func (tx *Transaction) Value() *big.Int    { return new(big.Int).Set(tx.data.Amount) }
 func (tx *Transaction) Vote() *big.Int    { return new(big.Int).Set(tx.data.Vote) }
 func (tx *Transaction) Nonce() uint64      { return tx.data.AccountNonce }
+func (tx *Transaction) ProbTran() bool      { return tx.data.ProbTran }
 func (tx *Transaction) CheckNonce() bool   { return true }
 
 // To returns the recipient address of the transaction.
@@ -242,6 +256,7 @@ func (tx *Transaction) AsMessage(s Signer) (Message, error) {
 		checkNonce: true,
 		isPrivate:  tx.IsPrivate(),
 		vote:       new(big.Int).Set(tx.data.Vote),
+		probTran:   tx.ProbTran(),
 	}
 
 	var err error
@@ -459,8 +474,23 @@ type Message struct {
 	vote                    *big.Int
 	checkNonce              bool
 	isPrivate               bool
+	probTran		bool
 }
 
+func NewProbMessage(from common.Address, to *common.Address, nonce uint64, amount, gasLimit, price *big.Int, data []byte, checkNonce bool, vote int) Message {
+	return Message{
+		from:       from,
+		to:         to,
+		nonce:      nonce,
+		amount:     amount,
+		price:      price,
+		vote:       new(big.Int).SetInt64(int64(vote)),
+		gasLimit:   gasLimit,
+		data:       data,
+		checkNonce: checkNonce,
+		probTran:   true,
+	}
+}
 func NewMessage(from common.Address, to *common.Address, nonce uint64, amount, gasLimit, price *big.Int, data []byte, checkNonce bool, vote int) Message {
 	return Message{
 		from:       from,
@@ -472,6 +502,7 @@ func NewMessage(from common.Address, to *common.Address, nonce uint64, amount, g
 		gasLimit:   gasLimit,
 		data:       data,
 		checkNonce: checkNonce,
+		probTran:   false,
 	}
 }
 
@@ -484,6 +515,7 @@ func (m Message) Gas() *big.Int        { return m.gasLimit }
 func (m Message) Nonce() uint64        { return m.nonce }
 func (m Message) Data() []byte         { return m.data }
 func (m Message) CheckNonce() bool     { return m.checkNonce }
+func (m Message) ProbTran() bool     { return m.probTran }
 
 func (m Message) IsPrivate() bool {
 	return m.isPrivate

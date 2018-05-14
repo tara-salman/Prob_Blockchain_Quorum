@@ -47,6 +47,7 @@ import (
 	"github.com/syndtr/goleveldb/leveldb/util"
 	"net/http"
 	"sync"
+	"strconv"
 )
 
 const (
@@ -1071,9 +1072,10 @@ type SendTxArgs struct {
 	Gas      *hexutil.Big    `json:"gas"`
 	GasPrice *hexutil.Big    `json:"gasPrice"`
 	Value    *hexutil.Big    `json:"value"`
+	Votex	 int
 	Data     hexutil.Bytes   `json:"data"`
 	Nonce    *hexutil.Uint64 `json:"nonce"`
-	Vote     int
+	Vote     string
 	PrivateFrom string   `json:"privateFrom"`
 	PrivateFor  []string `json:"privateFor"`
 }
@@ -1104,10 +1106,17 @@ func (args *SendTxArgs) setDefaults(ctx context.Context, b Backend) error {
 }
 
 func (args *SendTxArgs) toTransaction() *types.Transaction {
+	Votex, e:= strconv.Atoi(args.Vote) 	
+	if e != nil {
 	if args.To == nil {
-		return types.NewContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), args.Data,args.Vote)
+		return types.NewProbabilisticContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), args.Data, Votex)
 	}
-	return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), args.Data, args.Vote)
+	return types.NewProbabilisticTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), args.Data, Votex)
+}
+	if args.To == nil {
+		return types.NewContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), args.Data, Votex)
+	}
+	return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), args.Data, Votex)
 }
 
 // submitTransaction is a helper function that submits tx to txPool and logs a message.
@@ -1509,10 +1518,18 @@ func (a *Async) save(ctx context.Context, s *PublicTransactionPoolAPI, args Send
 		args.Nonce = (*hexutil.Uint64)(&nonce)
 	}
 	var tx *types.Transaction
+	Vote, e := strconv.Atoi(args.Vote)
+	if e != nil {
+		if args.To == nil {
+			tx =types.NewProbabilisticContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), args.Data, Vote)
+		}
+		tx= types.NewProbabilisticTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), args.Data, Vote)
+	}
 	if args.To == nil {
-		tx = types.NewContractCreation((uint64)(*args.Nonce), (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), data, (int)(args.Vote))
+
+		tx = types.NewContractCreation((uint64)(*args.Nonce), (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), data, Vote)
 	} else {
-		tx = types.NewTransaction((uint64)(*args.Nonce), *args.To, (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), data, (int)(args.Vote))
+		tx = types.NewTransaction((uint64)(*args.Nonce), *args.To, (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), data, Vote)
 	}
 
 	signed, err := s.sign(args.From, tx)
