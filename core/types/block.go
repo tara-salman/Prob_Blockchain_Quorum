@@ -207,7 +207,9 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 	}
 	var votes []*big.Int
 	for _, n := range b.transactions {
-		votes= append(votes,n.Vote())
+		if (n.ProbTran()){
+			votes= append(votes,n.Vote())
+	}
 	}
 	//fmt.Println ("hello")
 	b.VoteCast= append(b.VoteCast,Mean(votes))
