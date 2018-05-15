@@ -823,6 +823,7 @@ type RPCTransaction struct {
 	Gas              *hexutil.Big    `json:"gas"`
 	GasPrice         *hexutil.Big    `json:"gasPrice"`
 	Vote		 *big.Int         `json:"Vote"`
+	ProbTran         bool		
 	Hash             common.Hash     `json:"hash"`
 	Input            hexutil.Bytes   `json:"input"`
 	Nonce            hexutil.Uint64  `json:"nonce"`
@@ -854,6 +855,7 @@ func newRPCTransaction(tx *types.Transaction, blockHash common.Hash, blockNumber
 		Nonce:    hexutil.Uint64(tx.Nonce()),
 		To:       tx.To(),
 		Vote:     tx.Vote(),
+		ProbTran: tx.ProbTran(),
 		Value:    (*hexutil.Big)(tx.Value()),
 		V:        (*hexutil.Big)(v),
 		R:        (*hexutil.Big)(r),
@@ -1107,7 +1109,7 @@ func (args *SendTxArgs) setDefaults(ctx context.Context, b Backend) error {
 
 func (args *SendTxArgs) toTransaction() *types.Transaction {
 	Votex, e:= strconv.Atoi(args.Vote) 	
-	if e != nil {
+	if e == nil {
 	if args.To == nil {
 		return types.NewProbabilisticContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), args.Data, Votex)
 	}
@@ -1519,7 +1521,7 @@ func (a *Async) save(ctx context.Context, s *PublicTransactionPoolAPI, args Send
 	}
 	var tx *types.Transaction
 	Vote, e := strconv.Atoi(args.Vote)
-	if e != nil {
+	if e == nil {
 		if args.To == nil {
 			tx =types.NewProbabilisticContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), args.Data, Vote)
 		}

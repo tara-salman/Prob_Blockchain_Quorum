@@ -207,6 +207,7 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 	}
 	var votes []*big.Int
 	for _, n := range b.transactions {
+		log.Info("Vote cast at block is", "data ",fmt.Sprintf("%t",n.ProbTran()))		
 		if (n.ProbTran()){
 			votes= append(votes,n.Vote())
 	}
