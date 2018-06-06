@@ -593,6 +593,7 @@ type CallArgs struct {
 	Gas      hexutil.Big     `json:"gas"`
 	GasPrice hexutil.Big     `json:"gasPrice"`
 	Vote     int     `json:"vote"`
+	EventID  int
 	Value    hexutil.Big     `json:"value"`
 	Data     hexutil.Bytes   `json:"data"`
 }
@@ -614,7 +615,7 @@ func (s *PublicBlockChainAPI) doCall(ctx context.Context, args CallArgs, blockNr
 		}
 	}
 	// Set default gas & gas price if none were set
-	gas, gasPrice, vote := args.Gas.ToInt(), args.GasPrice.ToInt(), args.Vote
+	gas, gasPrice, vote, eventID := args.Gas.ToInt(), args.GasPrice.ToInt(), args.Vote,args.EventID
 	if gas.Sign() == 0 {
 		gas = big.NewInt(50000000)
 	}
@@ -624,7 +625,7 @@ func (s *PublicBlockChainAPI) doCall(ctx context.Context, args CallArgs, blockNr
 	}
 
 	// Create new call message
-	msg := types.NewMessage(addr, args.To, 0, args.Value.ToInt(), gas, gasPrice, args.Data, false,vote)
+	msg := types.NewMessage(addr, args.To, 0, args.Value.ToInt(), gas, gasPrice, args.Data, false,vote,eventID)
 
 	// Setup context so it may be cancelled the call has completed
 	// or, in case of unmetered gas, setup a context with a timeout.
@@ -823,6 +824,7 @@ type RPCTransaction struct {
 	Gas              *hexutil.Big    `json:"gas"`
 	GasPrice         *hexutil.Big    `json:"gasPrice"`
 	Vote		 *big.Int         `json:"Vote"`
+	EventID          *big.Int
 	ProbTran         bool		
 	Hash             common.Hash     `json:"hash"`
 	Input            hexutil.Bytes   `json:"input"`
@@ -855,6 +857,7 @@ func newRPCTransaction(tx *types.Transaction, blockHash common.Hash, blockNumber
 		Nonce:    hexutil.Uint64(tx.Nonce()),
 		To:       tx.To(),
 		Vote:     tx.Vote(),
+		EventID:  tx.EventID(),
 		ProbTran: tx.ProbTran(),
 		Value:    (*hexutil.Big)(tx.Value()),
 		V:        (*hexutil.Big)(v),
@@ -1023,6 +1026,7 @@ func (s *PublicTransactionPoolAPI) GetTransactionReceipt(hash common.Hash) (map[
 		"transactionHash":   hash,
 		"transactionIndex":  hexutil.Uint64(index),
 		"Vote":              tx.Vote(),
+		"EventID":           tx.EventID(),
 		"from":              from,
 		"to":                tx.To(),
 		"gasUsed":           (*hexutil.Big)(receipt.GasUsed),
@@ -1078,6 +1082,8 @@ type SendTxArgs struct {
 	Data     hexutil.Bytes   `json:"data"`
 	Nonce    *hexutil.Uint64 `json:"nonce"`
 	Vote     string
+	EventIDx int 
+	EventID  string
 	PrivateFrom string   `json:"privateFrom"`
 	PrivateFor  []string `json:"privateFor"`
 }
@@ -1108,17 +1114,18 @@ func (args *SendTxArgs) setDefaults(ctx context.Context, b Backend) error {
 }
 
 func (args *SendTxArgs) toTransaction() *types.Transaction {
-	Votex, e:= strconv.Atoi(args.Vote) 	
+	Votex, e:= strconv.Atoi(args.Vote) 
+	EventIDx, e:= strconv.Atoi(args.EventID) 	
 	if e == nil {
 	if args.To == nil {
-		return types.NewProbabilisticContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), args.Data, Votex)
+		return types.NewProbabilisticContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), args.Data, Votex,EventIDx)
 	}
-	return types.NewProbabilisticTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), args.Data, Votex)
+	return types.NewProbabilisticTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), args.Data, Votex,EventIDx)
 }
 	if args.To == nil {
-		return types.NewContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), args.Data, Votex)
+		return types.NewContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), args.Data, Votex,EventIDx)
 	}
-	return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), args.Data, Votex)
+	return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), args.Data, Votex,EventIDx)
 }
 
 // submitTransaction is a helper function that submits tx to txPool and logs a message.
@@ -1521,17 +1528,18 @@ func (a *Async) save(ctx context.Context, s *PublicTransactionPoolAPI, args Send
 	}
 	var tx *types.Transaction
 	Vote, e := strconv.Atoi(args.Vote)
+	EventID, _ := strconv.Atoi(args.EventID)
 	if e == nil {
 		if args.To == nil {
-			tx =types.NewProbabilisticContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), args.Data, Vote)
+			tx =types.NewProbabilisticContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), args.Data, Vote,EventID)
 		}
-		tx= types.NewProbabilisticTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), args.Data, Vote)
+		tx= types.NewProbabilisticTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), args.Data, Vote,EventID)
 	}
 	if args.To == nil {
 
-		tx = types.NewContractCreation((uint64)(*args.Nonce), (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), data, Vote)
+		tx = types.NewContractCreation((uint64)(*args.Nonce), (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), data, Vote,EventID)
 	} else {
-		tx = types.NewTransaction((uint64)(*args.Nonce), *args.To, (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), data, Vote)
+		tx = types.NewTransaction((uint64)(*args.Nonce), *args.To, (*big.Int)(args.Value), (*big.Int)(args.Gas), (*big.Int)(args.GasPrice), data, Vote,EventID)
 	}
 
 	signed, err := s.sign(args.From, tx)

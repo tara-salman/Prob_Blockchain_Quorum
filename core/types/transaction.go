@@ -62,6 +62,7 @@ type txdata struct {
 	Amount       *big.Int        `json:"value"    gencodec:"required"`
 	Payload      []byte          `json:"input"    gencodec:"required"`
 	Vote         *big.Int	     `json:"Vote"     gencodec:"required"`
+	EventID         *big.Int
 	// Signature values
 	V *big.Int `json:"v" gencodec:"required"`
 	R *big.Int `json:"r" gencodec:"required"`
@@ -76,30 +77,31 @@ type txdataMarshaling struct {
 	Price        *hexutil.Big
 	GasLimit     *hexutil.Big
 	Amount       *hexutil.Big
-	Vote         *big.Int         
+	Vote         *big.Int
+	EventID      *big.Int         
 	Payload      hexutil.Bytes
 	V            *hexutil.Big
 	R            *hexutil.Big
 	S            *hexutil.Big
 }
 
-func NewProbabilisticTransaction(nonce uint64, to common.Address, amount, gasLimit, gasPrice *big.Int, data []byte,vote int) *Transaction {
-	return newTransaction(nonce, &to, amount, gasLimit, gasPrice, data, true,new(big.Int).SetInt64(int64(vote)))
+func NewProbabilisticTransaction(nonce uint64, to common.Address, amount, gasLimit, gasPrice *big.Int, data []byte,vote int, eventID int) *Transaction {
+	return newTransaction(nonce, &to, amount, gasLimit, gasPrice, data, true,new(big.Int).SetInt64(int64(vote)), new(big.Int).SetInt64(int64(eventID)))
 }
 
-func NewProbabilisticContractCreation(nonce uint64, amount, gasLimit, gasPrice *big.Int, data []byte, vote int) *Transaction {
-	return newTransaction(nonce, nil, amount, gasLimit, gasPrice, data,  true,new(big.Int).SetInt64(int64(vote)))
+func NewProbabilisticContractCreation(nonce uint64, amount, gasLimit, gasPrice *big.Int, data []byte, vote int, eventID int) *Transaction {
+	return newTransaction(nonce, nil, amount, gasLimit, gasPrice, data,  true,new(big.Int).SetInt64(int64(vote)),new(big.Int).SetInt64(int64(eventID)))
 }
 
-func NewTransaction(nonce uint64, to common.Address, amount, gasLimit, gasPrice *big.Int, data []byte, vote int) *Transaction {
-	return newTransaction(nonce, &to, amount, gasLimit, gasPrice, data, false, new(big.Int).SetInt64(int64(vote)))
+func NewTransaction(nonce uint64, to common.Address, amount, gasLimit, gasPrice *big.Int, data []byte, vote int, eventID int) *Transaction {
+	return newTransaction(nonce, &to, amount, gasLimit, gasPrice, data, false, new(big.Int).SetInt64(int64(vote)),new(big.Int).SetInt64(int64(eventID)))
 }
 
-func NewContractCreation(nonce uint64, amount, gasLimit, gasPrice *big.Int, data []byte, vote int) *Transaction {
-	return newTransaction(nonce, nil, amount, gasLimit, gasPrice, data,  false, new(big.Int).SetInt64(int64(vote)))
+func NewContractCreation(nonce uint64, amount, gasLimit, gasPrice *big.Int, data []byte, vote int, eventID int) *Transaction {
+	return newTransaction(nonce, nil, amount, gasLimit, gasPrice, data,  false, new(big.Int).SetInt64(int64(vote)),new(big.Int).SetInt64(int64(eventID)))
 }
 
-func newTransaction(nonce uint64, to *common.Address, amount, gasLimit, gasPrice *big.Int, data []byte,probTran bool, vote *big.Int) *Transaction {
+func newTransaction(nonce uint64, to *common.Address, amount, gasLimit, gasPrice *big.Int, data []byte,probTran bool, vote *big.Int, eventID *big.Int) *Transaction {
 	if len(data) > 0 {
 		data = common.CopyBytes(data)
 	}
@@ -115,6 +117,7 @@ func newTransaction(nonce uint64, to *common.Address, amount, gasLimit, gasPrice
 		S:            new(big.Int),
 		ProbTran:     false,
 		Vote:         new(big.Int),
+		EventID:         new(big.Int),
 	}
 	if amount != nil {
 		d.Amount.Set(amount)
@@ -124,6 +127,9 @@ func newTransaction(nonce uint64, to *common.Address, amount, gasLimit, gasPrice
 	}
 	if vote != nil {
 		d.Vote.Set(vote)
+	}
+	if eventID != nil {
+		d.EventID.Set(eventID)
 	}
 	if gasLimit != nil {
 		d.GasLimit.Set(gasLimit)
@@ -204,6 +210,7 @@ func (tx *Transaction) Gas() *big.Int      { return new(big.Int).Set(tx.data.Gas
 func (tx *Transaction) GasPrice() *big.Int { return new(big.Int).Set(tx.data.Price) }
 func (tx *Transaction) Value() *big.Int    { return new(big.Int).Set(tx.data.Amount) }
 func (tx *Transaction) Vote() *big.Int    { return new(big.Int).Set(tx.data.Vote) }
+func (tx *Transaction) EventID() *big.Int    { return new(big.Int).Set(tx.data.EventID) }
 func (tx *Transaction) Nonce() uint64      { return tx.data.AccountNonce }
 func (tx *Transaction) ProbTran() bool      { return tx.data.ProbTran }
 func (tx *Transaction) CheckNonce() bool   { return true }
@@ -256,6 +263,7 @@ func (tx *Transaction) AsMessage(s Signer) (Message, error) {
 		checkNonce: true,
 		isPrivate:  tx.IsPrivate(),
 		vote:       new(big.Int).Set(tx.data.Vote),
+		eventID:       new(big.Int).Set(tx.data.EventID),
 		probTran:   tx.ProbTran(),
 	}
 
@@ -320,6 +328,7 @@ func (tx *Transaction) String() string {
 	Data:     0x%x
 	V:        %#x
 	Vote:     %#x
+	EventID:     %#x
 	R:        %#x
 	S:        %#x
 	Hex:      %x
@@ -335,6 +344,7 @@ func (tx *Transaction) String() string {
 		tx.data.Payload,
 		tx.data.V,
 		tx.data.Vote, 
+		tx.data.EventID,
 		tx.data.R,
 		tx.data.S,
 		enc,
@@ -472,12 +482,13 @@ type Message struct {
 	amount, price, gasLimit *big.Int
 	data                    []byte
 	vote                    *big.Int
+	eventID                 *big.Int
 	checkNonce              bool
 	isPrivate               bool
 	probTran		bool
 }
 
-func NewProbMessage(from common.Address, to *common.Address, nonce uint64, amount, gasLimit, price *big.Int, data []byte, checkNonce bool, vote int) Message {
+func NewProbMessage(from common.Address, to *common.Address, nonce uint64, amount, gasLimit, price *big.Int, data []byte, checkNonce bool, vote int, eventID int) Message {
 	return Message{
 		from:       from,
 		to:         to,
@@ -485,13 +496,14 @@ func NewProbMessage(from common.Address, to *common.Address, nonce uint64, amoun
 		amount:     amount,
 		price:      price,
 		vote:       new(big.Int).SetInt64(int64(vote)),
+		eventID:       new(big.Int).SetInt64(int64(eventID)),
 		gasLimit:   gasLimit,
 		data:       data,
 		checkNonce: checkNonce,
 		probTran:   true,
 	}
 }
-func NewMessage(from common.Address, to *common.Address, nonce uint64, amount, gasLimit, price *big.Int, data []byte, checkNonce bool, vote int) Message {
+func NewMessage(from common.Address, to *common.Address, nonce uint64, amount, gasLimit, price *big.Int, data []byte, checkNonce bool, vote int, eventID int) Message {
 	return Message{
 		from:       from,
 		to:         to,
@@ -499,6 +511,7 @@ func NewMessage(from common.Address, to *common.Address, nonce uint64, amount, g
 		amount:     amount,
 		price:      price,
 		vote:       new(big.Int).SetInt64(int64(vote)),
+		eventID:       new(big.Int).SetInt64(int64(eventID)),
 		gasLimit:   gasLimit,
 		data:       data,
 		checkNonce: checkNonce,
@@ -510,6 +523,7 @@ func (m Message) From() common.Address { return m.from }
 func (m Message) To() *common.Address  { return m.to }
 func (m Message) GasPrice() *big.Int   { return m.price }
 func (m Message) Vote() *big.Int   { return m.vote }
+func (m Message) EventID() *big.Int   { return m.eventID }
 func (m Message) Value() *big.Int      { return m.amount }
 func (m Message) Gas() *big.Int        { return m.gasLimit }
 func (m Message) Nonce() uint64        { return m.nonce }
