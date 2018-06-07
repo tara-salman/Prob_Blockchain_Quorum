@@ -214,7 +214,7 @@ func ListEvents ( votes [][] *big.Int) []Events {
 			
 		} else {
 		 for i,event := range events{
-		 	if (event.id ==votes[m][0]) {
+		 	if (event.id.Cmp(votes[m][0])==0) {
 				event.votes= append(event.votes,votes[m][1])
 				events[i]=event
 				
