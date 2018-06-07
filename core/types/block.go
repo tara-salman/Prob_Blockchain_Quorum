@@ -186,7 +186,42 @@ type storageblock struct {
 	TD       *big.Int
 	VoteCast [][] string
 }
-
+//function constains check if an int is in a list 
+func contains(s [] *big.Int, e *big.Int) bool {
+    for _, a := range s {
+        if (a.Cmp(e)==0) {
+            return true
+        }
+    }
+    return false
+}
+type Events struct {
+	id *big.Int  
+	votes [] *big.Int
+}
+// ListEvents function take all decisions and return the list of events included 
+func ListEvents ( votes [][] *big.Int) []Events {
+	var ids [] *big.Int
+	var events [] Events
+	 
+	for m,_:=range votes{ 
+		if (! contains(ids, votes[m][0])) {
+			ids= append(ids, votes[m][0])
+			var e Events
+			e.id= votes[m][0]
+			e.votes= append(e.votes,votes[m][1])
+			events= append(events,e)
+			
+		} else {
+		 for i,event := range events{
+		 	if (event.id ==votes[m][0]) {
+				event.votes= append(event.votes,votes[m][1])
+				events[i]=event
+				
+				}}
+		}}
+	return events
+}
 // NewBlock creates a new block. The input data is copied,
 // changes to header and to the field values will not affect the
 // block.
@@ -205,23 +240,29 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 		b.transactions = make(Transactions, len(txs))
 		copy(b.transactions, txs)
 	}
-	var votes []*big.Int
+	var votes [][]*big.Int
 	for _, n := range b.transactions {
 		log.Info("Vote cast at block is", "data ",fmt.Sprintf("%t",n.ProbTran()))		
 		if (n.ProbTran()){
-			votes= append(votes,n.Vote())
+			votes= append(votes,[]*big.Int{n.EventID(),n.Vote()})
 	}
 	}
+	var votesPerEvent [] Events
+	votesPerEvent = ListEvents(votes)
+	for i, _:= range votesPerEvent {
 	//fmt.Println ("hello")
-	mean :=  []string{"mean",Mean(votes).String()}
-	b.VoteCast= append(b.VoteCast,mean)
-	std := []string{"std",StandardDeviation(votes).String()}
-	b.VoteCast= append(b.VoteCast,std)
+		id:= []string{"id",votesPerEvent[i].id.String()}
+		b.VoteCast= append(b.VoteCast,id)
+		mean :=  []string{"mean",Mean(votesPerEvent[i].votes).String()}
+		b.VoteCast= append(b.VoteCast,mean)
+		std := []string{"std",StandardDeviation(votesPerEvent[i].votes).String()}
+		b.VoteCast= append(b.VoteCast,std)
 	//lower, upper := NormalConfidenceInterval(ciphertexts)
 	//ci = "["+lower.String()+","+upper.String()+"]"
 	//VoteCast= [mean, std, ci]
 	// caches
-	log.Info("Vote cast at block is", "data ",fmt.Sprintf("%x",b.VoteCast))
+		log.Info("Vote cast at block is", "data ",fmt.Sprintf("%x",b.VoteCast))
+	}
 	if len(receipts) == 0 {
 		b.header.ReceiptHash = EmptyRootHash
 	} else {
