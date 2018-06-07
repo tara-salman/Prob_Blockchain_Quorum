@@ -134,7 +134,7 @@ func rlpHash(x interface{}) (h common.Hash) {
 type Body struct {
 	Transactions []*Transaction
 	Uncles       []*Header
-	VoteCast     []*big.Int
+	VoteCast     [][]string
 }
 
 // Block represents an entire block in the Ethereum blockchain.
@@ -142,7 +142,7 @@ type Block struct {
 	header       *Header
 	uncles       []*Header
 	transactions Transactions
-	VoteCast []*big.Int
+	VoteCast [][]string
 	hash atomic.Value
 	size atomic.Value
 
@@ -174,7 +174,7 @@ type extblock struct {
 	Header *Header
 	Txs    []*Transaction
 	Uncles []*Header
-	VoteCast []*big.Int
+	VoteCast [][] string
 }
 
 // [deprecated by eth/63]
@@ -184,7 +184,7 @@ type storageblock struct {
 	Txs      []*Transaction
 	Uncles   []*Header
 	TD       *big.Int
-	VoteCast []*big.Int
+	VoteCast [][] string
 }
 
 // NewBlock creates a new block. The input data is copied,
@@ -213,14 +213,15 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 	}
 	}
 	//fmt.Println ("hello")
-	b.VoteCast= append(b.VoteCast,Mean(votes))
-	std := StandardDeviation(votes)
+	mean :=  []string{"mean",Mean(votes).String()}
+	b.VoteCast= append(b.VoteCast,mean)
+	std := []string{"std",StandardDeviation(votes).String()}
 	b.VoteCast= append(b.VoteCast,std)
 	//lower, upper := NormalConfidenceInterval(ciphertexts)
 	//ci = "["+lower.String()+","+upper.String()+"]"
 	//VoteCast= [mean, std, ci]
 	// caches
-	log.Info("Vote cast at block is", "data ",fmt.Sprintf("%d",b.VoteCast))
+	log.Info("Vote cast at block is", "data ",fmt.Sprintf("%x",b.VoteCast))
 	if len(receipts) == 0 {
 		b.header.ReceiptHash = EmptyRootHash
 	} else {
@@ -338,7 +339,7 @@ func (b *Block) ReceiptHash() common.Hash { return b.header.ReceiptHash }
 func (b *Block) UncleHash() common.Hash   { return b.header.UncleHash }
 func (b *Block) Extra() []byte            { return common.CopyBytes(b.header.Extra) }
 
-func (b *Block) VoteCastCall() []*big.Int {
+func (b *Block) VoteCastCall() [][]string {
 	log.Info("Vote cast at votecastcall is", "data ",fmt.Sprintf("%d",b.VoteCast))
 	if votecast:=b.VoteCast; votecast!=nil{
 		return votecast
@@ -388,7 +389,7 @@ func (b *Block) WithSeal(header *Header) *Block {
 }
 
 // WithBody returns a new block with the given transaction and uncle contents.
-func (b *Block) WithBody(transactions []*Transaction, uncles []*Header, voteCast []*big.Int) *Block {
+func (b *Block) WithBody(transactions []*Transaction, uncles []*Header, voteCast [][] string) *Block {
 	block := &Block{
 		header:       CopyHeader(b.header),
 		transactions: make([]*Transaction, len(transactions)),
