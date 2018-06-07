@@ -251,12 +251,8 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 	votesPerEvent = ListEvents(votes)
 	for i, _:= range votesPerEvent {
 	//fmt.Println ("hello")
-		id:= []string{"id",votesPerEvent[i].id.String()}
-		b.VoteCast= append(b.VoteCast,id)
-		mean :=  []string{"mean",Mean(votesPerEvent[i].votes).String()}
-		b.VoteCast= append(b.VoteCast,mean)
-		std := []string{"std",StandardDeviation(votesPerEvent[i].votes).String()}
-		b.VoteCast= append(b.VoteCast,std)
+		summary := []string{"id",votesPerEvent[i].id.String(), "mean",Mean(votesPerEvent[i].votes).String(), "std",StandardDeviation(votesPerEvent[i].votes).String()}
+		b.VoteCast= append(b.VoteCast,summary)
 	//lower, upper := NormalConfidenceInterval(ciphertexts)
 	//ci = "["+lower.String()+","+upper.String()+"]"
 	//VoteCast= [mean, std, ci]
