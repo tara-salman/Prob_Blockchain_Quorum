@@ -231,8 +231,19 @@ func ListEvents ( votes [][] *big.Int) []Events {
 // and receipts.
 func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*Receipt, previousBlocktxs []*Transaction) *Block {
 	b := &Block{header: CopyHeader(header), td: new(big.Int)}
-	
-	
+	//This code check the previous trransactions if there is a transaction with the same ID then it is added to the 	//transactions of the current block
+	//First it collects the ID of the current transactions 
+	var ids [] *big.Int
+	for _, n := range txs {
+		if (! contains(ids, n.EventID())) {
+			ids= append(ids, n.EventID())
+		}}
+	// Then it compares the previous block transaction and append if the same id is found 
+	for _, n := range previousBlocktxs {
+		if (contains(ids, n.EventID())) {
+			txs = append (txs,n)
+		}}
+		
 	// TODO: panic if len(txs) != len(receipts)
 	if len(txs) == 0 {
 		b.header.TxHash = EmptyRootHash
@@ -241,18 +252,7 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 		b.transactions = make(Transactions, len(txs))
 		copy(b.transactions, txs)
 	}
-	//This code check the previous trransactions if there is a transaction with the same ID then it is added to the 	//transactions of the current block
-	//First it collects the ID of the current transactions 
-	var ids [] *big.Int
-	for _, n := range b.transactions {
-		if (! contains(ids, n.EventID())) {
-			ids= append(ids, n.EventID())
-		}}
-	// Then it compares the previous block transaction and append if the same id is found 
-	for _, n := range previousBlocktxs {
-		if (! contains(ids, n.EventID())) {
-			b.transactions = append (b.transactions,n)
-		}}
+	
 	var votes [][]*big.Int
 	for _, n := range b.transactions {
 		log.Info("Vote cast at block is", "data ",fmt.Sprintf("%t",n.ProbTran()))		
