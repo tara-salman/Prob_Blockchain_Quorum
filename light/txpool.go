@@ -351,9 +351,10 @@ func (pool *TxPool) validateTx(ctx context.Context, tx *types.Transaction) error
 	}
 	// Last but not least check for nonce errors
 	currentState := pool.currentState(ctx)
-	if n := currentState.GetNonce(from); n > tx.Nonce() {
-		return core.ErrNonceTooLow
-	}
+	if !tx.IsOld(){
+		if n := currentState.GetNonce(from); n > tx.Nonce() {
+			return core.ErrNonceTooLow
+	}}
 
 	// Check the transaction doesn't exceed the current
 	// block limit gas.
