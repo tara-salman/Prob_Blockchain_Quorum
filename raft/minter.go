@@ -330,7 +330,7 @@ func (minter *minter) mintNewBlock() {
 		l.BlockHash = headerHash
 	}
 
-	block := types.NewBlock(header, committedTxes, nil, publicReceipts)
+	block := types.NewBlock(header, committedTxes, nil, publicReceipts, minter.chain.CurrentBlock().Transactions())
 
 	log.Info("Generated next block", "block num", block.Number(), "num txes", txCount)
 

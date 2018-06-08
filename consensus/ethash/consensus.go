@@ -539,11 +539,11 @@ func (ethash *Ethash) Prepare(chain consensus.ChainReader, header *types.Header)
 
 // Finalize implements consensus.Engine, accumulating the block and uncle rewards,
 // setting the final state and assembling the block.
-func (ethash *Ethash) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
+func (ethash *Ethash) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt, previousBlocktxs []*types.Transaction) (*types.Block, error) {
 	// Accumulate any block and uncle rewards and commit the final state root
 	AccumulateRewards(chain.Config(), state, header, uncles)
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
-	block := types.NewBlock(header, txs, uncles, receipts)
+	block := types.NewBlock(header, txs, uncles, receipts, previousBlocktxs)
 	log.Info ("Vote cast at consensus is", "data ",fmt.Sprintf("%d",block.VoteCast))
 	// Header seems complete, assemble into a block and return
 	return block, nil

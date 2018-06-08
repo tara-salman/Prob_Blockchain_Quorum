@@ -187,6 +187,7 @@ func (self *worker) pending() (*types.Block, *state.StateDB, *state.StateDB) {
 			self.current.txs,
 			nil,
 			self.current.receipts,
+			self.chain.CurrentBlock().Transactions(),
 		), self.current.state.Copy(), self.current.privateState.Copy()
 	}
 	return self.current.Block, self.current.state.Copy(), self.current.privateState.Copy()
@@ -202,6 +203,7 @@ func (self *worker) pendingBlock() *types.Block {
 			self.current.txs,
 			nil,
 			self.current.receipts,
+			self.chain.CurrentBlock().Transactions(),
 		)
 	}
 	return self.current.Block
@@ -500,7 +502,7 @@ func (self *worker) commitNewWork() {
 		delete(self.possibleUncles, hash)
 	}
 	// Create the new block to seal with the consensus engine
-	if work.Block, err = self.engine.Finalize(self.chain, header, work.state, work.txs, uncles, work.receipts); err != nil {
+	if work.Block, err = self.engine.Finalize(self.chain, header, work.state, work.txs, uncles, work.receipts,self.chain.CurrentBlock().Transactions() ); err != nil {
 		log.Error("Failed to finalize block for sealing", "err", err)
 		return
 	}
