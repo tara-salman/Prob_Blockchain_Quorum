@@ -500,7 +500,7 @@ var (
 	RaftBlockTimeFlag = cli.IntFlag{
 		Name:  "raftblocktime",
 		Usage: "Amount of time between raft block creations in milliseconds",
-		Value: 100000,
+		Value: 10000,
 	}
 	RaftJoinExistingFlag = cli.IntFlag{
 		Name:  "raftjoinexisting",
