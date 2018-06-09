@@ -238,12 +238,11 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 		if (! contains(ids, n.EventID())) {
 			ids= append(ids, n.EventID())
 		}}
+	var neededTx []* Transaction
 	// Then it compares the previous block transaction and append if the same id is found 
 	for _, n := range previousBlocktxs {
 		if (contains(ids, n.EventID())) {
-			n.SetIsOld(true) 
-			log.Info("boolean at block", "data ",fmt.Sprintf("%t",n.IsOld))
-			txs = append (txs,n)
+			neededTx = append (neededTx,n)
 		}}
 		
 	// TODO: panic if len(txs) != len(receipts)
@@ -258,6 +257,11 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 	var votes [][]*big.Int
 	for _, n := range b.transactions {
 		log.Info("Vote cast at block is", "data ",fmt.Sprintf("%t",n.ProbTran()))		
+		if (n.ProbTran()){
+			votes= append(votes,[]*big.Int{n.EventID(),n.Vote()})
+	}
+	}
+	for _, n := range neededTx {		
 		if (n.ProbTran()){
 			votes= append(votes,[]*big.Int{n.EventID(),n.Vote()})
 	}

@@ -60,7 +60,6 @@ type StateTransition struct {
 	data       []byte
 	state      vm.StateDB
 	evm        *vm.EVM
-	IsOld      bool
 }
 
 // Message represents a message sent to a contract.
@@ -68,10 +67,11 @@ type Message interface {
 	From() common.Address
 	//FromFrontier() (common.Address, error)
 	To() *common.Address
+
 	GasPrice() *big.Int
 	Gas() *big.Int
 	Value() *big.Int
-	IsOld() bool 
+
 	Nonce() uint64
 	CheckNonce() bool
 	Data() []byte
@@ -122,7 +122,6 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition 
 		value:      msg.Value(),
 		data:       msg.Data(),
 		state:      evm.PublicState(),
-		IsOld:	    msg.IsOld(),
 	}
 }
 
@@ -207,8 +206,7 @@ func (st *StateTransition) preCheck() error {
 		nonce := st.state.GetNonce(sender.Address())
 		if nonce < msg.Nonce() {
 			return ErrNonceTooHigh
-		} else if !msg.IsOld() && nonce > msg.Nonce() {
-			log.Info("I failed at state transision")
+		} else if nonce > msg.Nonce() {
 			return ErrNonceTooLow
 		}
 	}
