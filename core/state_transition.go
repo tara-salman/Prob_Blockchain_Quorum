@@ -207,6 +207,7 @@ func (st *StateTransition) preCheck() error {
 		if nonce < msg.Nonce() {
 			return ErrNonceTooHigh
 		} else if nonce > msg.Nonce() {
+			log.Info("I failed at state transision")
 			return ErrNonceTooLow
 		}
 	}

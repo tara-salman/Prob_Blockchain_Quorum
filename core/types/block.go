@@ -242,6 +242,7 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 	for _, n := range previousBlocktxs {
 		if (contains(ids, n.EventID())) {
 			n.SetIsOld(true) 
+			log.Info("boolean at block", "data ",fmt.Sprintf("%t",n.IsOld))
 			txs = append (txs,n)
 		}}
 		
