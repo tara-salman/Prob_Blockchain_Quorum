@@ -1361,7 +1361,7 @@ func (d *Downloader) importBlockResults(results []*fetchResult) error {
 		)
 		blocks := make([]*types.Block, items)
 		for i, result := range results[:items] {
-			blocks[i] = types.NewBlockWithHeader(result.Header).WithBody(result.Transactions, result.Uncles,result.VoteCast)
+			blocks[i] = types.NewBlockWithHeader(result.Header).WithBody(result.Transactions, result.Uncles,result.VoteCast, result.Previousrransactions)
 		}
 		if index, err := d.blockchain.InsertChain(blocks); err != nil {
 			log.Debug("Downloaded item processing failed", "number", results[index].Header.Number, "hash", results[index].Header.Hash(), "err", err)
@@ -1449,7 +1449,7 @@ func (d *Downloader) commitFastSyncData(results []*fetchResult, stateSync *state
 		blocks := make([]*types.Block, items)
 		receipts := make([]types.Receipts, items)
 		for i, result := range results[:items] {
-			blocks[i] = types.NewBlockWithHeader(result.Header).WithBody(result.Transactions, result.Uncles,result.VoteCast)
+			blocks[i] = types.NewBlockWithHeader(result.Header).WithBody(result.Transactions, result.Uncles,result.VoteCast, result.Previousrransactions)
 			receipts[i] = result.Receipts
 		}
 		if index, err := d.blockchain.InsertReceiptChain(blocks, receipts); err != nil {
@@ -1463,7 +1463,7 @@ func (d *Downloader) commitFastSyncData(results []*fetchResult, stateSync *state
 }
 
 func (d *Downloader) commitPivotBlock(result *fetchResult) error {
-	b := types.NewBlockWithHeader(result.Header).WithBody(result.Transactions, result.Uncles,result.VoteCast)
+	b := types.NewBlockWithHeader(result.Header).WithBody(result.Transactions, result.Uncles,result.VoteCast, result.Previousrransactions)
 	// Sync the pivot block state. This should complete reasonably quickly because
 	// we've already synced up to the reported head block state earlier.
 	if err := d.syncState(b.Root()).Wait(); err != nil {

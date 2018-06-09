@@ -96,6 +96,7 @@ type bodyFilterTask struct {
 	uncles       [][]*types.Header      // Collection of uncles per block bodies
 	time         time.Time              // Arrival time of the blocks' contents
 	voteCast    [][][]string
+	previoustransactions [][]*types.Transaction
 }
 
 // inject represents a schedules import operation.
@@ -531,7 +532,7 @@ func (f *Fetcher) loop() {
 							matched = true
 
 							if f.getBlock(hash) == nil {
-								block := types.NewBlockWithHeader(announce.header).WithBody(task.transactions[i], task.uncles[i],task.voteCast[i])
+								block := types.NewBlockWithHeader(announce.header).WithBody(task.transactions[i], task.uncles[i],task.voteCast[i],task.previoustransactions[i])
 								block.ReceivedAt = task.time
 
 								blocks = append(blocks, block)

@@ -67,8 +67,7 @@ type txdata struct {
 	V *big.Int `json:"v" gencodec:"required"`
 	R *big.Int `json:"r" gencodec:"required"`
 	S *big.Int `json:"s" gencodec:"required"`
-	ProbTran    bool
-	IsOld       bool 
+	ProbTran    bool 
 	// This is only used when marshaling to JSON.
 	Hash *common.Hash `json:"hash" rlp:"-"`
 }
@@ -117,7 +116,6 @@ func newTransaction(nonce uint64, to *common.Address, amount, gasLimit, gasPrice
 		R:            new(big.Int),
 		S:            new(big.Int),
 		ProbTran:     false,
-		IsOld:     false,
 		Vote:         new(big.Int),
 		EventID:         new(big.Int),
 	}
@@ -215,9 +213,9 @@ func (tx *Transaction) Vote() *big.Int    { return new(big.Int).Set(tx.data.Vote
 func (tx *Transaction) EventID() *big.Int    { return new(big.Int).Set(tx.data.EventID) }
 func (tx *Transaction) Nonce() uint64      { return tx.data.AccountNonce }
 func (tx *Transaction) ProbTran() bool      { return tx.data.ProbTran }
-func (tx *Transaction) IsOld() bool      { return tx.data.IsOld }
+
 func (tx *Transaction) CheckNonce() bool   { return true }
-func (tx *Transaction) SetIsOld(x bool)      { tx.data.IsOld=x}
+
 
 // To returns the recipient address of the transaction.
 // It returns nil if the transaction is a contract creation.
@@ -269,7 +267,7 @@ func (tx *Transaction) AsMessage(s Signer) (Message, error) {
 		vote:       new(big.Int).Set(tx.data.Vote),
 		eventID:       new(big.Int).Set(tx.data.EventID),
 		probTran:   tx.ProbTran(),
-		isOld:   tx.IsOld(),
+		
 
 	}
 
@@ -492,7 +490,7 @@ type Message struct {
 	checkNonce              bool
 	isPrivate               bool
 	probTran		bool
-	isOld			bool
+	
 }
 
 func NewProbMessage(from common.Address, to *common.Address, nonce uint64, amount, gasLimit, price *big.Int, data []byte, checkNonce bool, vote int, eventID int) Message {
@@ -508,7 +506,7 @@ func NewProbMessage(from common.Address, to *common.Address, nonce uint64, amoun
 		data:       data,
 		checkNonce: checkNonce,
 		probTran:   true,
-		isOld:      false, 
+		 
 	}
 }
 func NewMessage(from common.Address, to *common.Address, nonce uint64, amount, gasLimit, price *big.Int, data []byte, checkNonce bool, vote int, eventID int) Message {
@@ -524,7 +522,7 @@ func NewMessage(from common.Address, to *common.Address, nonce uint64, amount, g
 		data:       data,
 		checkNonce: checkNonce,
 		probTran:   false,
-		isOld:      false, 
+		
 	}
 }
 
@@ -539,7 +537,7 @@ func (m Message) Nonce() uint64        { return m.nonce }
 func (m Message) Data() []byte         { return m.data }
 func (m Message) CheckNonce() bool     { return m.checkNonce }
 func (m Message) ProbTran() bool     { return m.probTran }
-func (m Message) IsOld() bool     { return m.isOld }
+
 
 func (m Message) IsPrivate() bool {
 	return m.isPrivate

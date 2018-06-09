@@ -58,6 +58,7 @@ type fetchResult struct {
 	Transactions types.Transactions
 	Receipts     types.Receipts
 	VoteCast     [][] string
+	Previousrransactions types.Transactions
 }
 
 // queue represents hashes that are either need fetching or are being fetched

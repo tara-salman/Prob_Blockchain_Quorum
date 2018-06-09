@@ -781,7 +781,7 @@ func (s *PublicBlockChainAPI) rpcOutputBlock(b *types.Block, inclTx bool, fullTx
 		"timestamp":        (*hexutil.Big)(head.Time),
 		"transactionsRoot": head.TxHash,
 		"receiptsRoot":     head.ReceiptHash,
-		"VoteCast":         b.VoteCastCall(), 
+		"VoteCast":         b.VoteCastCall(),  
 	}
 
 	if inclTx {
@@ -804,6 +804,14 @@ func (s *PublicBlockChainAPI) rpcOutputBlock(b *types.Block, inclTx bool, fullTx
 			}
 		}
 		fields["transactions"] = transactions
+		ptxs := b.PreviousTransactions()
+		previoustransactions := make([]interface{}, len(ptxs))
+		for i, tx := range b.PreviousTransactions() {
+			if previoustransactions[i], err = formatTx(tx); err != nil {
+				return nil, err
+			}
+		}
+		fields["previoustransactions"] = previoustransactions
 	}
 
 	uncles := b.Uncles()
