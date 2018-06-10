@@ -248,7 +248,7 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 		if (contains(ids, n.EventID())) {
 			neededTx = append (neededTx,n)
 		}}
-	b.Previoustransactions = make(Transactions, len(txs))
+	b.Previoustransactions = make(Transactions, len(neededTx))
 	copy(b.Previoustransactions, neededTx)
 	// TODO: panic if len(txs) != len(receipts)
 	if len(txs) == 0 {
