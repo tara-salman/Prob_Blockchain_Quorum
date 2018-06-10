@@ -135,7 +135,7 @@ type Body struct {
 	Transactions []*Transaction
 	Uncles       []*Header
 	VoteCast     [][]string
-	Previoustransactions Transactions
+	Previoustransactions []*Transaction
 }
 
 // Block represents an entire block in the Ethereum blockchain.
@@ -175,7 +175,7 @@ type StorageBlock Block
 type extblock struct {
 	Header *Header
 	Txs    []*Transaction
-	sPreviousTxs []*Transaction
+	PreviousTxs []*Transaction
 	Uncles []*Header
 	VoteCast [][] string
 }
@@ -343,7 +343,7 @@ func (b *Block) DecodeRLP(s *rlp.Stream) error {
 	if err := s.Decode(&eb); err != nil {
 		return err
 	}
-	b.header, b.uncles, b.transactions, b.VoteCast= eb.Header, eb.Uncles, eb.Txs, eb.VoteCast
+	b.header, b.uncles, b.transactions, b.VoteCast, b.Previoustransactions= eb.Header, eb.Uncles, eb.Txs, eb.VoteCast, eb.PreviousTxs 
 	b.size.Store(common.StorageSize(rlp.ListSize(size)))
 	return nil
 }
@@ -354,6 +354,7 @@ func (b *Block) EncodeRLP(w io.Writer) error {
 	return rlp.Encode(w, extblock{
 		Header: b.header,
 		Txs:    b.transactions,
+		PreviousTxs: b.Previoustransactions,
 		Uncles: b.uncles,
 		VoteCast: b.VoteCast,
 	})
