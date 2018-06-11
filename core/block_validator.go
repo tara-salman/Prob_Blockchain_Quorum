@@ -78,6 +78,7 @@ func (v *BlockValidator) ValidateBody(block *types.Block) error {
 // otherwise nil and an error is returned.
 //
 // For quorum it also verifies if the canonical hash in the blocks state points to a valid parent hash.
+// For probablistic blockchain it compares the consensus decision value as well
 func (v *BlockValidator) ValidateState(block, parent *types.Block, statedb *state.StateDB, receipts types.Receipts, usedGas *big.Int) error {
 	header := block.Header()
 	if block.GasUsed().Cmp(usedGas) != 0 {
@@ -99,7 +100,30 @@ func (v *BlockValidator) ValidateState(block, parent *types.Block, statedb *stat
 	if root := statedb.IntermediateRoot(v.config.IsEIP158(header.Number)); header.Root != root {
 		return fmt.Errorf("invalid merkle root (remote: %x local: %x)", header.Root, root)
 	}
-
+	//This code check the previous trransactions if there is a transaction with the same ID then it is added to the 	//transactions of the current block
+	//First it collects the ID of the current transactions 
+	var votes [][]*big.Int
+	for _, n := range block.Transactions() {		
+		if (n.ProbTran()){
+			votes= append(votes,[]*big.Int{n.EventID(),n.Vote()})
+	}
+	}
+	for _, n := range block.PreviousTransactions() {		
+		if (n.ProbTran()){
+			votes= append(votes,[]*big.Int{n.EventID(),n.Vote()})
+	}
+	}
+	var votesPerEvent [] Events
+	votesPerEvent = ListEvents(votes)
+	for i, _:= range votesPerEvent {
+		if (Mean(votesPerEvent[i].votes).String()!=block.VoteCastCall()[i][4]){
+			return fmt.Errorf("invalid votecast mean")
+		}
+		if (StandardDeviation(votesPerEvent[i].votes).String()!=block.VoteCastCall()[i][6]){
+			return fmt.Errorf("invalid votecast std")
+		}
+			
+	}
 	return nil
 }
 
@@ -134,4 +158,80 @@ func CalcGasLimit(parent *types.Block) *big.Int {
 		gl.Set(math.BigMin(gl, params.TargetGasLimit))
 	}
 	return gl
+}
+// Mean returns the mean of an integer array as a float
+func Mean(nums [] *big.Int) (mean *big.Int) {
+	if len(nums) == 0 {
+		return big.NewInt(0)
+	}
+
+	mean = new(big.Int)
+	for _, n := range nums {
+		mean = new(big.Int).Add(mean,n)
+	}
+	return (new(big.Int).Quo(mean,new(big.Int).SetInt64(int64(len(nums)))))
+}
+
+func StandardDeviation(nums [] *big.Int) (dev *big.Int) {
+	if len(nums) == 0 {
+		return big.NewInt(0)
+	}
+
+	m := Mean(nums)
+	dev = new(big.Int)
+	for _, n := range nums {
+	//	dev += (new(big.Float).SetInt(big.NewInt(n)) - m) * ( new(big.Float).SetInt(big.NewInt(n)) - m)
+		dev= new(big.Int).Add(new(big.Int).Mul(new(big.Int).Sub( n,m), new(big.Int).Sub( n,m)),dev)
+	}
+	dev = new(big.Int).Quo(dev,new(big.Int).SetInt64(int64(len(nums))))
+	dev = new(big.Int).Sqrt(dev)//bigfloat.Pow(dev,new(big.Float).SetFloat64(0.5)) //math.Pow(dev/  big.Float(len(nums)), 0.5)
+	return dev
+}
+func NormalConfidenceInterval(nums [] *big.Int) (lower *big.Int, upper *big.Int) {
+	if len(nums) == 0 {
+		return big.NewInt(0),big.NewInt(0)
+	}
+
+	conf := 1.95996 // 95% confidence for the mean, http://bit.ly/Mm05eZ
+	mean := Mean(nums)
+	dev := new(big.Int).Quo(StandardDeviation(nums),new(big.Int).Sqrt(big.NewInt(int64(len(nums)))))
+	lower = new(big.Int).Sub(mean,new(big.Int).Mul(dev,big.NewInt(int64(conf))))
+	upper = new(big.Int).Add(mean,new(big.Int).Mul(dev,big.NewInt(int64(conf))))
+	return lower,upper
+}
+//function constains check if an int is in a list 
+func contains(s [] *big.Int, e *big.Int) bool {
+    for _, a := range s {
+        if (a.Cmp(e)==0) {
+            return true
+        }
+    }
+    return false
+}
+type Events struct {
+	id *big.Int  
+	votes [] *big.Int
+}
+// ListEvents function take all decisions and return the list of events included 
+func ListEvents ( votes [][] *big.Int) []Events {
+	var ids [] *big.Int
+	var events [] Events
+	 
+	for m,_:=range votes{ 
+		if (! contains(ids, votes[m][0])) {
+			ids= append(ids, votes[m][0])
+			var e Events
+			e.id= votes[m][0]
+			e.votes= append(e.votes,votes[m][1])
+			events= append(events,e)
+			
+		} else {
+		 for i,event := range events{
+		 	if (event.id.Cmp(votes[m][0])==0) {
+				event.votes= append(event.votes,votes[m][1])
+				events[i]=event
+				
+				}}
+		}}
+	return events
 }
