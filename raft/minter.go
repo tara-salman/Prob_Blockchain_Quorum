@@ -329,8 +329,14 @@ func (minter *minter) mintNewBlock() {
 	for _, l := range logs {
 		l.BlockHash = headerHash
 	}
-
-	block := types.NewBlock(header, committedTxes, nil, publicReceipts, minter.chain.CurrentBlock().Transactions())
+	var previous [] *types.Transaction
+	for _, n := range minter.chain.CurrentBlock().Transactions() {		
+			previous= append(previous,n)
+	}
+	for _, n := range minter.chain.CurrentBlock().PreviousTransactions() {		
+			previous= append(previous,n)
+	}
+	block := types.NewBlock(header, committedTxes, nil, publicReceipts, previous)
 
 	log.Info("Generated next block", "block num", block.Number(), "num txes", txCount)
 
