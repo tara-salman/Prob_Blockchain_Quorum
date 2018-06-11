@@ -116,11 +116,11 @@ func (v *BlockValidator) ValidateState(block, parent *types.Block, statedb *stat
 	var votesPerEvent [] Events
 	votesPerEvent = ListEvents(votes)
 	for i, _:= range votesPerEvent {
-		if (Mean(votesPerEvent[i].votes).String()!=block.VoteCastCall()[i][4]){
+		if (Mean(votesPerEvent[i].votes).String()!=block.VoteCastCall()[i][3]){
 			log.Info("Vote cast at block validator is", "data ",fmt.Sprintf("%x",block.VoteCastCall()[i][4]))
 			return fmt.Errorf("invalid votecast mean")
 		}
-		if (StandardDeviation(votesPerEvent[i].votes).String()!=block.VoteCastCall()[i][6]){
+		if (StandardDeviation(votesPerEvent[i].votes).String()!=block.VoteCastCall()[i][5]){
 			return fmt.Errorf("invalid votecast std")
 		}
 			
