@@ -180,14 +180,20 @@ func (self *worker) setExtra(extra []byte) {
 func (self *worker) pending() (*types.Block, *state.StateDB, *state.StateDB) {
 	self.currentMu.Lock()
 	defer self.currentMu.Unlock()
-
+	var previous [] *types.Transaction
+	for _, n := range self.chain.CurrentBlock().Transactions() {		
+			previous= append(previous,n)
+	}
+	for _, n := range self.chain.CurrentBlock().PreviousTransactions() {		
+			previous= append(previous,n)
+	}
 	if atomic.LoadInt32(&self.mining) == 0 {
 		return types.NewBlock(
 			self.current.header,
 			self.current.txs,
 			nil,
 			self.current.receipts,
-			self.chain.CurrentBlock().Transactions(),
+			previous,
 		), self.current.state.Copy(), self.current.privateState.Copy()
 	}
 	return self.current.Block, self.current.state.Copy(), self.current.privateState.Copy()
@@ -196,14 +202,20 @@ func (self *worker) pending() (*types.Block, *state.StateDB, *state.StateDB) {
 func (self *worker) pendingBlock() *types.Block {
 	self.currentMu.Lock()
 	defer self.currentMu.Unlock()
-
+	var previous [] *types.Transaction
+	for _, n := range self.chain.CurrentBlock().Transactions() {		
+			previous= append(previous,n)
+	}
+	for _, n := range self.chain.CurrentBlock().PreviousTransactions() {		
+			previous= append(previous,n)
+	}
 	if atomic.LoadInt32(&self.mining) == 0 {
 		return types.NewBlock(
 			self.current.header,
 			self.current.txs,
 			nil,
 			self.current.receipts,
-			self.chain.CurrentBlock().Transactions(),
+			previous,
 		)
 	}
 	return self.current.Block
@@ -501,8 +513,15 @@ func (self *worker) commitNewWork() {
 	for _, hash := range badUncles {
 		delete(self.possibleUncles, hash)
 	}
+	var previous [] *types.Transaction
+	for _, n := range self.chain.CurrentBlock().Transactions() {		
+			previous= append(previous,n)
+	}
+	for _, n := range self.chain.CurrentBlock().PreviousTransactions() {		
+			previous= append(previous,n)
+	}
 	// Create the new block to seal with the consensus engine
-	if work.Block, err = self.engine.Finalize(self.chain, header, work.state, work.txs, uncles, work.receipts,self.chain.CurrentBlock().Transactions() ); err != nil {
+	if work.Block, err = self.engine.Finalize(self.chain, header, work.state, work.txs, uncles, work.receipts,previous ); err != nil {
 		log.Error("Failed to finalize block for sealing", "err", err)
 		return
 	}

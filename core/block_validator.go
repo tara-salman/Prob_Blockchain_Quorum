@@ -19,7 +19,7 @@ package core
 import (
 	"fmt"
 	"math/big"
-
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/consensus"
 	"github.com/ethereum/go-ethereum/core/state"
@@ -117,6 +117,7 @@ func (v *BlockValidator) ValidateState(block, parent *types.Block, statedb *stat
 	votesPerEvent = ListEvents(votes)
 	for i, _:= range votesPerEvent {
 		if (Mean(votesPerEvent[i].votes).String()!=block.VoteCastCall()[i][4]){
+			log.Info("Vote cast at block validator is", "data ",fmt.Sprintf("%x",block.VoteCastCall()[i][4]))
 			return fmt.Errorf("invalid votecast mean")
 		}
 		if (StandardDeviation(votesPerEvent[i].votes).String()!=block.VoteCastCall()[i][6]){
