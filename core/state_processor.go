@@ -89,8 +89,15 @@ func (p *StateProcessor) Process(block *types.Block, statedb, privateState *stat
 			allLogs = append(allLogs, privateReceipt.Logs...)
 		}
 	}
+	var previous [] *types.Transaction
+	for _, n := range p.bc.CurrentBlock().Transactions() {		
+			previous= append(previous,n)
+	}
+	for _, n := range p.bc.CurrentBlock().PreviousTransactions() {		
+			previous= append(previous,n)
+	}
 	// Finalize the block, applying any consensus engine specific extras (e.g. block rewards)
-	p.engine.Finalize(p.bc, header, statedb, block.Transactions(), block.Uncles(), receipts, p.bc.CurrentBlock().Transactions())
+	p.engine.Finalize(p.bc, header, statedb, block.Transactions(), block.Uncles(), receipts, previous)
 
 	return receipts, privateReceipts, allLogs, totalUsedGas, nil
 }
