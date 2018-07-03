@@ -55,6 +55,7 @@ func (v *BlockValidator) ValidateBody(block *types.Block) error {
 	if v.bc.HasBlockAndState(block.Hash()) {
 		return ErrKnownBlock
 	}
+	log.Info("Vote cast at block validator is", "data ",fmt.Sprintf("%x",block.VoteCastCall()))
 	if !v.bc.HasBlockAndState(block.ParentHash()) {
 		return consensus.ErrUnknownAncestor
 	}
