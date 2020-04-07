@@ -239,10 +239,9 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 	//First it collects the ID of the current transactions 
 	var ids [] *big.Int
 	for _, n := range txs {
-		if (n.ProbTran()){
 			if (! contains(ids, n.EventID())) {
 				ids= append(ids, n.EventID())
-		}}}
+		}}
 	var neededTx []* Transaction
 	// Then it compares the previous block transaction and append if the same id is found 
 	for _, n := range previousBlocktxs {
@@ -252,7 +251,7 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 				log.Info("probtran", "data ",fmt.Sprintf("%v",n.ProbTran()))
 		}}}
 	b.Previoustransactions = make(Transactions, len(neededTx))
-	log.Info("Previous Transaction", "data ",fmt.Sprintf("%x",len(neededTx)))
+	//log.Info("Previous Transaction", "data ",fmt.Sprintf("%x",len(neededTx)))
 	copy(b.Previoustransactions, neededTx)
 	// TODO: panic if len(txs) != len(receipts)
 	if len(txs) == 0 {
