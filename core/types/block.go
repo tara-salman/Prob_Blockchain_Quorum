@@ -239,13 +239,13 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 	//First it collects the ID of the current transactions 
 	var ids [] *big.Int
 	for _, n := range txs {
-		if (! contains(ids, n.EventID()) && n.EventID()!='0')) {
+		if (! contains(ids, n.EventID()) && n.EventID()!=big.NewInt(0)) {
 			ids= append(ids, n.EventID())
 		}}
 	var neededTx []* Transaction
 	// Then it compares the previous block transaction and append if the same id is found 
 	for _, n := range previousBlocktxs {
-		if (contains(ids, n.EventID()) {
+		if (contains(ids, n.EventID())) {
 			neededTx = append (neededTx,n)
 		}}
 	b.Previoustransactions = make(Transactions, len(neededTx))
