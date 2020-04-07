@@ -247,7 +247,7 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 	for _, n := range previousBlocktxs {
 		if (contains(ids, n.EventID())&& !n.ProbTran()) {
 			neededTx = append (neededTx,n)
-			log.Info("EventID", "data ",fmt.Sprintf("%x",n.EventID()))
+			log.Info("probtran", "data ",fmt.Sprintf("%v",n.ProbTran()))
 		}}
 	b.Previoustransactions = make(Transactions, len(neededTx))
 	log.Info("Previous Transaction", "data ",fmt.Sprintf("%x",len(neededTx)))
