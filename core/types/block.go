@@ -239,7 +239,7 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 	//First it collects the ID of the current transactions 
 	var ids [] *big.Int
 	for _, n := range txs {
-		if (! contains(ids, n.EventID()) && ! contains(n.EventID(), 0)) {
+		if (! contains(ids, n.EventID()) && n.EventID()!='0')) {
 			ids= append(ids, n.EventID())
 		}}
 	var neededTx []* Transaction
