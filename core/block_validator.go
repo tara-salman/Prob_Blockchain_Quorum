@@ -109,7 +109,7 @@ func (v *BlockValidator) ValidateState(block, parent *types.Block, statedb *stat
 			votes= append(votes,[]*big.Int{n.EventID(),n.Vote()})
 	}
 	}
-	for _, n := range block.PreviousTransactions() {		
+	for _, n := range block.PreviousTrans() {		
 		if (n.ProbTran()){
 			votes= append(votes,[]*big.Int{n.EventID(),n.Vote()})
 	}

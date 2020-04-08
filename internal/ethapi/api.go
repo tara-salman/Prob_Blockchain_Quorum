@@ -804,14 +804,14 @@ func (s *PublicBlockChainAPI) rpcOutputBlock(b *types.Block, inclTx bool, fullTx
 			}
 		}
 		fields["transactions"] = transactions
-		ptxs := b.PreviousTransactions()
-		previoustransactions := make([]interface{}, len(ptxs))
-		for i, tx := range b.PreviousTransactions() {
-			if previoustransactions[i], err = formatTx(tx); err != nil {
+		ptxs := b.PreviousTrans()
+		previoustrans := make([]interface{}, len(ptxs))
+		for i, tx := range b.PreviousTrans() {
+			if previoustrans[i], err = formatTx(tx); err != nil {
 				return nil, err
 			}
 		}
-		fields["previoustransactions"] = previoustransactions
+		fields["previoustrans"] = previoustrans
 	}
 
 	uncles := b.Uncles()

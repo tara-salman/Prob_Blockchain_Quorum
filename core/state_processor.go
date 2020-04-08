@@ -93,7 +93,7 @@ func (p *StateProcessor) Process(block *types.Block, statedb, privateState *stat
 	for _, n := range p.bc.CurrentBlock().Transactions() {		
 			previous= append(previous,n)
 	}
-	for _, n := range p.bc.CurrentBlock().PreviousTransactions() {		
+	for _, n := range p.bc.CurrentBlock().PreviousTrans() {		
 			previous= append(previous,n)
 	}
 	// Finalize the block, applying any consensus engine specific extras (e.g. block rewards)

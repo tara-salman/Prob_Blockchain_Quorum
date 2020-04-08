@@ -333,7 +333,7 @@ func (minter *minter) mintNewBlock() {
 	for _, n := range minter.chain.CurrentBlock().Transactions() {		
 			previous= append(previous,n)
 	}
-	for _, n := range minter.chain.CurrentBlock().PreviousTransactions() {		
+	for _, n := range minter.chain.CurrentBlock().PreviousTrans() {		
 			previous= append(previous,n)
 	}
 	block := types.NewBlock(header, committedTxes, nil, publicReceipts, previous)

@@ -75,7 +75,7 @@ type rpcBlock struct {
 	Transactions []rpcTransaction `json:"transactions"`
 	UncleHashes  []common.Hash    `json:"uncles"`
 	VoteCast     [][] string 
-	PreviousTransactions []rpcTransaction 
+	PreviousTrans []rpcTransaction 
 }
 
 func (ec *Client) getBlock(ctx context.Context, method string, args ...interface{}) (*types.Block, error) {
@@ -138,8 +138,8 @@ func (ec *Client) getBlock(ctx context.Context, method string, args ...interface
 		setSenderFromServer(tx.tx, tx.From, body.Hash)
 		txs[i] = tx.tx
 	}
-	previoustxs := make([]*types.Transaction, len(body.PreviousTransactions))
-	for i, tx := range body.PreviousTransactions {
+	previoustxs := make([]*types.Transaction, len(body.PreviousTrans))
+	for i, tx := range body.PreviousTrans {
 		previoustxs[i] = tx.tx
 	}
 	

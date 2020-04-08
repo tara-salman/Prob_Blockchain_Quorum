@@ -135,7 +135,7 @@ type Body struct {
 	Transactions []*Transaction
 	Uncles       []*Header
 	VoteCast     [][]string
-	Previoustransactions []*Transaction
+	Previoustrans[]*Transaction
 }
 
 // Block represents an entire block in the Ethereum blockchain.
@@ -143,7 +143,7 @@ type Block struct {
 	header       *Header
 	uncles       []*Header
 	transactions Transactions
-	Previoustransactions Transactions
+	Previoustrans Transactions
 	VoteCast [][]string
 	hash atomic.Value
 	size atomic.Value
@@ -251,9 +251,9 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 				neededTx = append (neededTx,n)
 				log.Info("probtran", "data ",fmt.Sprintf("%v",n.ProbTran()))
 		}}}
-	b.Previoustransactions = make(Transactions, len(neededTx))
+	b.Previoustrans = make(Transactions, len(neededTx))
 	//log.Info("Previous Transaction", "data ",fmt.Sprintf("%x",len(neededTx)))
-	copy(b.Previoustransactions, neededTx)
+	copy(b.Previoustrans, neededTx)
 	// TODO: panic if len(txs) != len(receipts)
 	if len(txs) == 0 {
 		b.header.TxHash = EmptyRootHash
@@ -347,7 +347,7 @@ func (b *Block) DecodeRLP(s *rlp.Stream) error {
 	if err := s.Decode(&eb); err != nil {
 		return err
 	}
-	b.header, b.uncles, b.transactions, b.VoteCast, b.Previoustransactions= eb.Header, eb.Uncles, eb.Txs, eb.VoteCast, eb.PreviousTxs 
+	b.header, b.uncles, b.transactions, b.VoteCast, b.Previoustrans= eb.Header, eb.Uncles, eb.Txs, eb.VoteCast, eb.PreviousTxs 
 	b.size.Store(common.StorageSize(rlp.ListSize(size)))
 	return nil
 }
@@ -358,7 +358,7 @@ func (b *Block) EncodeRLP(w io.Writer) error {
 	return rlp.Encode(w, extblock{
 		Header: b.header,
 		Txs:    b.transactions,
-		PreviousTxs: b.Previoustransactions,
+		PreviousTxs: b.Previoustrans,
 		Uncles: b.uncles,
 		VoteCast: b.VoteCast,
 	})
@@ -378,7 +378,7 @@ func (b *StorageBlock) DecodeRLP(s *rlp.Stream) error {
 
 func (b *Block) Uncles() []*Header          { return b.uncles }
 func (b *Block) Transactions() Transactions { return b.transactions }
-func (b *Block) PreviousTransactions() Transactions { return b.Previoustransactions }
+func (b *Block) PreviousTrans() Transactions { return b.Previoustrans }
 
 func (b *Block) Transaction(hash common.Hash) *Transaction {
 	for _, transaction := range b.transactions {
@@ -416,7 +416,7 @@ func (b *Block) VoteCastCall() [][]string {
 func (b *Block) Header() *Header { return CopyHeader(b.header) }
 
 // Body returns the non-header content of the block.
-func (b *Block) Body() *Body { return &Body{b.transactions, b.uncles, b.VoteCast, b.Previoustransactions} }
+func (b *Block) Body() *Body { return &Body{b.transactions, b.uncles, b.VoteCast, b.Previoustrans} }
 
 func (b *Block) HashNoNonce() common.Hash {
 	return b.header.HashNoNonce()
@@ -456,16 +456,16 @@ func (b *Block) WithSeal(header *Header) *Block {
 }
 
 // WithBody returns a new block with the given transaction and uncle contents.
-func (b *Block) WithBody(transactions []*Transaction, uncles []*Header, voteCast [][] string, previoustransactions []*Transaction) *Block {
+func (b *Block) WithBody(transactions []*Transaction, uncles []*Header, voteCast [][] string, previoustrans []*Transaction) *Block {
 	block := &Block{
 		header:       CopyHeader(b.header),
 		transactions: make([]*Transaction, len(transactions)),
 		uncles:       make([]*Header, len(uncles)),
 		VoteCast:     voteCast,
-		Previoustransactions: make([]*Transaction, len(previoustransactions)), 
+		Previoustrans: make([]*Transaction, len(previoustrans)), 
 	}
 	copy(block.transactions, transactions)
-	copy(block.Previoustransactions, previoustransactions)
+	copy(block.Previoustrans, previoustrans)
 	for i := range uncles {
 		block.uncles[i] = CopyHeader(uncles[i])
 	}

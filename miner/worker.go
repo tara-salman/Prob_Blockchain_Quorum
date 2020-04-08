@@ -184,7 +184,7 @@ func (self *worker) pending() (*types.Block, *state.StateDB, *state.StateDB) {
 	for _, n := range self.chain.CurrentBlock().Transactions() {		
 			previous= append(previous,n)
 	}
-	for _, n := range self.chain.CurrentBlock().PreviousTransactions() {		
+	for _, n := range self.chain.CurrentBlock().PreviousTrans() {		
 			previous= append(previous,n)
 	}
 	if atomic.LoadInt32(&self.mining) == 0 {
@@ -206,7 +206,7 @@ func (self *worker) pendingBlock() *types.Block {
 	for _, n := range self.chain.CurrentBlock().Transactions() {		
 			previous= append(previous,n)
 	}
-	for _, n := range self.chain.CurrentBlock().PreviousTransactions() {		
+	for _, n := range self.chain.CurrentBlock().PreviousTrans() {		
 			previous= append(previous,n)
 	}
 	if atomic.LoadInt32(&self.mining) == 0 {
@@ -517,7 +517,7 @@ func (self *worker) commitNewWork() {
 	for _, n := range self.chain.CurrentBlock().Transactions() {		
 			previous= append(previous,n)
 	}
-	for _, n := range self.chain.CurrentBlock().PreviousTransactions() {		
+	for _, n := range self.chain.CurrentBlock().PreviousTrans() {		
 			previous= append(previous,n)
 	}
 	// Create the new block to seal with the consensus engine
