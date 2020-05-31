@@ -14,6 +14,10 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
+//This function has been changed to reflect probabilistic transactions and contracts. 
+//new transaction types has been added (named ProbabilisticTransaction and ProbabilisticContract)
+//in additions variables named Vote, EventID and probTransaction has been added. 
+// The changes are all over the class.
 package types
 
 import (
@@ -54,6 +58,9 @@ type Transaction struct {
 	from atomic.Value
 }
 
+//Txdata has changes with the introduction of vote and event ID
+//In addition, probTran, defining whether a transaction has a 
+//probabilistic event or not, has been added
 type txdata struct {
 	AccountNonce uint64          `json:"nonce"    gencodec:"required"`
 	Price        *big.Int        `json:"gasPrice" gencodec:"required"`
@@ -61,34 +68,35 @@ type txdata struct {
 	Recipient    *common.Address `json:"to"       rlp:"nil"` // nil means contract creation
 	Amount       *big.Int        `json:"value"    gencodec:"required"`
 	Payload      []byte          `json:"input"    gencodec:"required"`
-	Vote         *big.Int	     `json:"Vote"     gencodec:"required"`
-	EventID         *big.Int
+	Vote         *big.Int	     `json:"Vote"     gencodec:"required"` //added for pbc
+	EventID         *big.Int //added for pbc
 	// Signature values
 	V *big.Int `json:"v" gencodec:"required"`
 	R *big.Int `json:"r" gencodec:"required"`
 	S *big.Int `json:"s" gencodec:"required"`
-	ProbTran    bool 
+	ProbTran    bool //added for pbc
 	// This is only used when marshaling to JSON.
 	Hash *common.Hash `json:"hash" rlp:"-"`
 }
-
+//This function has been modified for pbc
 type txdataMarshaling struct {
 	AccountNonce hexutil.Uint64
 	Price        *hexutil.Big
 	GasLimit     *hexutil.Big
 	Amount       *hexutil.Big
-	Vote         *big.Int
-	EventID      *big.Int         
+	Vote         *big.Int //added for pbc
+	EventID      *big.Int //added for pbc       
 	Payload      hexutil.Bytes
 	V            *hexutil.Big
 	R            *hexutil.Big
 	S            *hexutil.Big
 }
 
+//a newly added function
 func NewProbabilisticTransaction(nonce uint64, to common.Address, amount, gasLimit, gasPrice *big.Int, data []byte,vote int, eventID int) *Transaction {
 	return newTransaction(nonce, &to, amount, gasLimit, gasPrice, data, true,new(big.Int).SetInt64(int64(vote)), new(big.Int).SetInt64(int64(eventID)))
 }
-
+//a newly added function
 func NewProbabilisticContractCreation(nonce uint64, amount, gasLimit, gasPrice *big.Int, data []byte, vote int, eventID int) *Transaction {
 	return newTransaction(nonce, nil, amount, gasLimit, gasPrice, data,  true,new(big.Int).SetInt64(int64(vote)),new(big.Int).SetInt64(int64(eventID)))
 }
@@ -100,7 +108,7 @@ func NewTransaction(nonce uint64, to common.Address, amount, gasLimit, gasPrice 
 func NewContractCreation(nonce uint64, amount, gasLimit, gasPrice *big.Int, data []byte, vote int, eventID int) *Transaction {
 	return newTransaction(nonce, nil, amount, gasLimit, gasPrice, data,  false, new(big.Int).SetInt64(int64(vote)),new(big.Int).SetInt64(int64(eventID)))
 }
-
+//changed for pbc
 func newTransaction(nonce uint64, to *common.Address, amount, gasLimit, gasPrice *big.Int, data []byte,probTran bool, vote *big.Int, eventID *big.Int) *Transaction {
 	if len(data) > 0 {
 		data = common.CopyBytes(data)
@@ -115,19 +123,22 @@ func newTransaction(nonce uint64, to *common.Address, amount, gasLimit, gasPrice
 		V:            new(big.Int),
 		R:            new(big.Int),
 		S:            new(big.Int),
-		ProbTran:     false,
-		Vote:         new(big.Int),
-		EventID:         new(big.Int),
+		ProbTran:     false,//added for pbc
+		Vote:         new(big.Int),//added for pbc 
+		EventID:         new(big.Int),//added for pbc
 	}
 	if amount != nil {
 		d.Amount.Set(amount)
 	}
+	//added for pbc
 	if probTran ==true{
 		d.ProbTran=true
 	}
+	//added for pbc
 	if vote != nil {
 		d.Vote.Set(vote)
 	}
+	//added for pbc
 	if eventID != nil {
 		d.EventID.Set(eventID)
 	}
@@ -209,10 +220,10 @@ func (tx *Transaction) Data() []byte       { return common.CopyBytes(tx.data.Pay
 func (tx *Transaction) Gas() *big.Int      { return new(big.Int).Set(tx.data.GasLimit) }
 func (tx *Transaction) GasPrice() *big.Int { return new(big.Int).Set(tx.data.Price) }
 func (tx *Transaction) Value() *big.Int    { return new(big.Int).Set(tx.data.Amount) }
-func (tx *Transaction) Vote() *big.Int    { return new(big.Int).Set(tx.data.Vote) }
-func (tx *Transaction) EventID() *big.Int    { return new(big.Int).Set(tx.data.EventID) }
+func (tx *Transaction) Vote() *big.Int    { return new(big.Int).Set(tx.data.Vote) }//added for pbc
+func (tx *Transaction) EventID() *big.Int    { return new(big.Int).Set(tx.data.EventID) }//added for pbc
 func (tx *Transaction) Nonce() uint64      { return tx.data.AccountNonce }
-func (tx *Transaction) ProbTran() bool      { return tx.data.ProbTran }
+func (tx *Transaction) ProbTran() bool      { return tx.data.ProbTran }//added for pbc
 
 func (tx *Transaction) CheckNonce() bool   { return true }
 
@@ -264,9 +275,9 @@ func (tx *Transaction) AsMessage(s Signer) (Message, error) {
 		data:       tx.data.Payload,
 		checkNonce: true,
 		isPrivate:  tx.IsPrivate(),
-		vote:       new(big.Int).Set(tx.data.Vote),
-		eventID:       new(big.Int).Set(tx.data.EventID),
-		probTran:   tx.ProbTran(),
+		vote:       new(big.Int).Set(tx.data.Vote),//added for pbc
+		eventID:       new(big.Int).Set(tx.data.EventID),//added for pbc
+		probTran:   tx.ProbTran(),//added for pbc
 		
 
 	}
@@ -298,7 +309,7 @@ func (tx *Transaction) Cost() *big.Int {
 func (tx *Transaction) RawSignatureValues() (*big.Int, *big.Int, *big.Int) {
 	return tx.data.V, tx.data.R, tx.data.S
 }
-
+//changed for pbc
 func (tx *Transaction) String() string {
 	var from, to string
 	if tx.data.V != nil {
@@ -485,14 +496,14 @@ type Message struct {
 	nonce                   uint64
 	amount, price, gasLimit *big.Int
 	data                    []byte
-	vote                    *big.Int
-	eventID                 *big.Int
+	vote                    *big.Int//added for pbc
+	eventID                 *big.Int//added for pbc
 	checkNonce              bool
 	isPrivate               bool
 	probTran		bool
 	
 }
-
+//new function for pbc 
 func NewProbMessage(from common.Address, to *common.Address, nonce uint64, amount, gasLimit, price *big.Int, data []byte, checkNonce bool, vote int, eventID int) Message {
 	return Message{
 		from:       from,
@@ -529,14 +540,14 @@ func NewMessage(from common.Address, to *common.Address, nonce uint64, amount, g
 func (m Message) From() common.Address { return m.from }
 func (m Message) To() *common.Address  { return m.to }
 func (m Message) GasPrice() *big.Int   { return m.price }
-func (m Message) Vote() *big.Int   { return m.vote }
-func (m Message) EventID() *big.Int   { return m.eventID }
+func (m Message) Vote() *big.Int   { return m.vote }//added for pbc
+func (m Message) EventID() *big.Int   { return m.eventID }//added for pbc
 func (m Message) Value() *big.Int      { return m.amount }
 func (m Message) Gas() *big.Int        { return m.gasLimit }
 func (m Message) Nonce() uint64        { return m.nonce }
 func (m Message) Data() []byte         { return m.data }
 func (m Message) CheckNonce() bool     { return m.checkNonce }
-func (m Message) ProbTran() bool     { return m.probTran }
+func (m Message) ProbTran() bool     { return m.probTran }//added for pbc
 
 
 func (m Message) IsPrivate() bool {
