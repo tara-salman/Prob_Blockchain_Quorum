@@ -15,6 +15,12 @@
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // Package types contains data types related to Ethereum consensus.
+
+
+//This files has been edited for pbc. New variables have been added to the block body.
+//The block construction has change to introduce the summary functions. The previous transaction
+// for the same event to decide on has been included. 
+//And a new list of summary function including mean, and std has been added at the end.  
 package types
 
 import (
@@ -131,14 +137,19 @@ func rlpHash(x interface{}) (h common.Hash) {
 
 // Body is a simple (mutable, non-safe) data container for storing and moving
 // a block's data contents (transactions and uncles) together.
+
+// Edited for probabilstic blockchain version. VoteCast has been added to cast the votes
+// also previous transactions represent the decisions made in earlier blocks
 type Body struct {
 	Transactions []*Transaction
 	Uncles       []*Header
-	VoteCast     [][]string
-	Previoustrans[]*Transaction
+	VoteCast     [][]string //Added for pbc
+	Previoustrans[]*Transaction //Added for pbc
 }
 
 // Block represents an entire block in the Ethereum blockchain.
+// Edited for probabilstic blockchain version. VoteCast has been added to cast the votes
+// also previous transactions represent the decisions made in earlier blocks
 type Block struct {
 	header       *Header
 	uncles       []*Header
@@ -172,12 +183,13 @@ func (b *Block) DeprecatedTd() *big.Int {
 type StorageBlock Block
 
 // "external" block encoding. used for eth protocol, etc.
+//changes for pbc. PreviousTxs and VoteCast has been added 
 type extblock struct {
 	Header *Header
 	Txs    []*Transaction
-	PreviousTxs []*Transaction
+	PreviousTxs []*Transaction //Added for pbc
 	Uncles []*Header
-	VoteCast [][] string
+	VoteCast [][] string //Added for pbc
 }
 
 // [deprecated by eth/63]
@@ -185,11 +197,12 @@ type extblock struct {
 type storageblock struct {
 	Header   *Header
 	Txs      []*Transaction
-	PreviousTxs []*Transaction
+	PreviousTxs []*Transaction //Added for pbc
 	Uncles   []*Header
 	TD       *big.Int
-	VoteCast [][] string
+	VoteCast [][] string//Added for pbc
 }
+
 //function constains check if an int is in a list 
 func contains(s [] *big.Int, e *big.Int) bool {
     for _, a := range s {
@@ -203,6 +216,7 @@ type Events struct {
 	id *big.Int  
 	votes [] *big.Int
 }
+//this function have been added for pbc
 // ListEvents function take all decisions and return the list of events included 
 func ListEvents ( votes [][] *big.Int) []Events {
 	var ids [] *big.Int
@@ -233,8 +247,10 @@ func ListEvents ( votes [][] *big.Int) []Events {
 // The values of TxHash, UncleHash, ReceiptHash and Bloom in header
 // are ignored and set to values derived from the given txs, uncles
 // and receipts.
+//the function has been rewritten for pbc
 func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*Receipt, previousBlocktxs []*Transaction) *Block {
 	b := &Block{header: CopyHeader(header), td: new(big.Int)}
+	//The following until 
 	//This code check the previous trransactions if there is a transaction with the same ID then it is added to the 	//transactions of the current block
 	//First it collects the ID of the current transactions 
 	var ids [] *big.Int
@@ -341,6 +357,7 @@ func CopyHeader(h *Header) *Header {
 }
 
 // DecodeRLP decodes the Ethereum
+//This function has been rewritten for pbc
 func (b *Block) DecodeRLP(s *rlp.Stream) error {
 	var eb extblock
 	_, size, _ := s.Kind()
@@ -353,14 +370,15 @@ func (b *Block) DecodeRLP(s *rlp.Stream) error {
 }
 
 // EncodeRLP serializes b into the Ethereum RLP block format.
+//This function has been rewritten for pbc
 func (b *Block) EncodeRLP(w io.Writer) error {
 	log.Info("Vote cast at rlp encoding is", "data ",fmt.Sprintf("%d",b.VoteCastCall()))
 	return rlp.Encode(w, extblock{
 		Header: b.header,
 		Txs:    b.transactions,
-		PreviousTxs: b.Previoustrans,
+		PreviousTxs: b.Previoustrans, //added for pbc
 		Uncles: b.uncles,
-		VoteCast: b.VoteCast,
+		VoteCast: b.VoteCast, //added for pbc
 	})
 }
 
@@ -377,8 +395,8 @@ func (b *StorageBlock) DecodeRLP(s *rlp.Stream) error {
 // TODO: copies
 
 func (b *Block) Uncles() []*Header          { return b.uncles }
-func (b *Block) Transactions() Transactions { return b.transactions }
-func (b *Block) PreviousTrans() Transactions { return b.Previoustrans }
+func (b *Block) Transactions() Transactions { return b.transactions } 
+func (b *Block) PreviousTrans() Transactions { return b.Previoustrans } //new function
 
 func (b *Block) Transaction(hash common.Hash) *Transaction {
 	for _, transaction := range b.transactions {
@@ -406,6 +424,7 @@ func (b *Block) ReceiptHash() common.Hash { return b.header.ReceiptHash }
 func (b *Block) UncleHash() common.Hash   { return b.header.UncleHash }
 func (b *Block) Extra() []byte            { return common.CopyBytes(b.header.Extra) }
 
+//new function
 func (b *Block) VoteCastCall() [][]string {
 	log.Info("Vote cast at votecastcall is", "data ",fmt.Sprintf("%d",b.VoteCast))
 	if votecast:=b.VoteCast; votecast!=nil{
@@ -416,6 +435,7 @@ func (b *Block) VoteCastCall() [][]string {
 func (b *Block) Header() *Header { return CopyHeader(b.header) }
 
 // Body returns the non-header content of the block.
+//rewritten function
 func (b *Block) Body() *Body { return &Body{b.transactions, b.uncles, b.VoteCast, b.Previoustrans} }
 
 func (b *Block) HashNoNonce() common.Hash {
@@ -461,11 +481,11 @@ func (b *Block) WithBody(transactions []*Transaction, uncles []*Header, voteCast
 		header:       CopyHeader(b.header),
 		transactions: make([]*Transaction, len(transactions)),
 		uncles:       make([]*Header, len(uncles)),
-		VoteCast:     voteCast,
-		Previoustrans: make([]*Transaction, len(previoustrans)), 
+		VoteCast:     voteCast,//added for pbc
+		Previoustrans: make([]*Transaction, len(previoustrans)), //added for pbc
 	}
-	copy(block.transactions, transactions)
-	copy(block.Previoustrans, previoustrans)
+	copy(block.transactions, transactions) 
+	copy(block.Previoustrans, previoustrans)//added for pbc
 	for i := range uncles {
 		block.uncles[i] = CopyHeader(uncles[i])
 	}
@@ -543,6 +563,7 @@ func (self blockSorter) Less(i, j int) bool { return self.by(self.blocks[i], sel
 
 func Number(b1, b2 *Block) bool { return b1.header.Number.Cmp(b2.header.Number) < 0 }
 
+//All the rest has been addeded for pbc 
 // Mean returns the mean of an integer array as a float
 func Mean(nums [] *big.Int) (mean *big.Int) {
 	if len(nums) == 0 {
